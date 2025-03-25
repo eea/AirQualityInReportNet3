@@ -1,0 +1,1 @@
+The aim of this repo is to document activities related to technical support for air quality related data processing and automation - aiming at development of the new AQ e-Reporting system and transition to ReportNet3.
