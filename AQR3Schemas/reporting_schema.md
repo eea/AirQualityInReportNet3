@@ -1,6 +1,6 @@
 ```mermaid
 erDiagram
-    reporting_Adjustment {
+    Adjustment {
         nvarchar CountryCode PK
         varchar ComplianceId PK
         nvarchar DeductionAssessmentMethod PK
@@ -8,10 +8,10 @@ erDiagram
         nvarchar AdjustmentSource
         decimal MaxRatioUncertainty
     }
-    reporting_Adjustment }o--o{ reporting_ComplianceAssessmentMethod : "CountryCode + ComplianceId + DeductionAssessmentMethod"
-    reporting_Adjustment }o--o{ reporting_Model : "CountryCode + ComplianceId + DeductionAssessmentMethod"
+    Adjustment }o--o{ ComplianceAssessmentMethod : "CountryCode + ComplianceId + DeductionAssessmentMethod"
+    Adjustment }o--o{ Model : "CountryCode + ComplianceId + DeductionAssessmentMethod"
 
-    reporting_AssessmentRegime {
+    AssessmentRegime {
         varchar CountryCode PK
         int ReportingYear PK
         varchar DataAggregationProcessId PK
@@ -33,9 +33,9 @@ erDiagram
         int ClassificationYear
         varchar ClassificationReport
     }
-    reporting_AssessmentRegime ||--o{ reporting_ComplianceAssessmentMethod : "CountryCode + ReportingYear + AssessmentRegimeId + DataAggregationProcessId"
+    AssessmentRegime ||--o{ ComplianceAssessmentMethod : "CountryCode + ReportingYear + AssessmentRegimeId + DataAggregationProcessId"
 
-    reporting_Authority {
+    Authority {
         nvarchar CountryCode PK
         nvarchar AuthorityInstanceId PK
         int Object PK
@@ -45,7 +45,7 @@ erDiagram
         nvarchar OrganisationAddress
         nvarchar PersonName
     }
-    reporting_ComplianceAssessmentMethod {
+    ComplianceAssessmentMethod {
         varchar CountryCode PK
         int ReportingYear PK
         varchar AssessmentRegimeId PK
@@ -67,19 +67,19 @@ erDiagram
         nvarchar SamplingPointRepresentativenessAreaId
         nvarchar PreliminaryReason
     }
-    reporting_ComplianceAssessmentMethod ||--o{ reporting_PlanScenario : "via CompliancePlanLink (CountryCode + PlanId + ScenarioId)"
-    reporting_ComplianceAssessmentMethod ||--o{ reporting_SamplingPoint_SRA : "CountryCode + AssessmentMethodId + SamplingPointRepresentativenessAreaId"
+    ComplianceAssessmentMethod ||--o{ PlanScenario : "via CompliancePlanLink (CountryCode + PlanId + ScenarioId)"
+    ComplianceAssessmentMethod ||--o{ SamplingPoint_SRA : "CountryCode + AssessmentMethodId + SamplingPointRepresentativenessAreaId"
 
-    reporting_CompliancePlanLink {
+    CompliancePlanLink {
         varchar CountryCode PK
         varchar ComplianceId PK
         nvarchar PlanId PK
         nvarchar SourceAppId PK
         nvarchar ScenarioId PK
     }
-    reporting_CompliancePlanLink ||--o{ reporting_PlanScenario : "CountryCode + PlanId + ScenarioId"
+    CompliancePlanLink ||--o{ PlanScenario : "CountryCode + PlanId + ScenarioId"
 
-    reporting_Measure {
+    Measure {
         nvarchar CountryCode PK
         nvarchar MeasureId PK
         datetime ReportingTime PK
@@ -97,7 +97,7 @@ erDiagram
         varchar MeasureStatus
         int ReasonIfMeasureNotUsed
     }
-    reporting_MeasurementResults {
+    MeasurementResults {
         varchar CountryCode PK
         varchar AssessmentMethodId PK
         int AirPollutantCode PK
@@ -111,9 +111,9 @@ erDiagram
         decimal DataCapture
         datetime ResultTime
     }
-    reporting_MeasurementResults ||--o{ reporting_ModellingResults : "CountryCode + AssessmentMethodId + AirPollutantCode"
+    MeasurementResults ||--o{ ModellingResults : "CountryCode + AssessmentMethodId + AirPollutantCode"
 
-    reporting_Model {
+    Model {
         varchar CountryCode PK
         nvarchar AssessmentMethodId PK
         int AirPollutantCode PK
@@ -124,11 +124,11 @@ erDiagram
         nvarchar DataQualityReport
         decimal MQI
     }
-    reporting_Model ||--o{ reporting_ComplianceAssessmentMethod : "CountryCode + AssessmentMethodId + AirPollutantCode + DataAggregationProcessId"
-    reporting_Model ||--o{ reporting_ModellingResults : "CountryCode + AssessmentMethodId + AirPollutantCode + DataAggregationProcessId"
-    reporting_Model ||--o{ reporting_PlanScenario : "CountryCode + AssessmentMethodId + AirPollutantCode + DataAggregationProcessId"
+    Model ||--o{ ComplianceAssessmentMethod : "CountryCode + AssessmentMethodId + AirPollutantCode + DataAggregationProcessId"
+    Model ||--o{ ModellingResults : "CountryCode + AssessmentMethodId + AirPollutantCode + DataAggregationProcessId"
+    Model ||--o{ PlanScenario : "CountryCode + AssessmentMethodId + AirPollutantCode + DataAggregationProcessId"
 
-    reporting_ModellingResults {
+    ModellingResults {
         varchar CountryCode PK
         varchar AssessmentMethodId PK
         int AirPollutantCode PK
@@ -141,12 +141,12 @@ erDiagram
         int Validity
         datetime ResultTime
     }
-    reporting_ModellingResults ||--o{ reporting_ComplianceAssessmentMethod : "CountryCode + AssessmentMethodId + AirPollutantCode + DataAggregationProcessId"
-    reporting_ModellingResults ||--o{ reporting_MeasurementResults : "CountryCode + AssessmentMethodId + AirPollutantCode"
-    reporting_ModellingResults ||--o{ reporting_Model : "CountryCode + AssessmentMethodId + AirPollutantCode + DataAggregationProcessId"
-    reporting_ModellingResults ||--o{ reporting_PlanScenario : "CountryCode + AssessmentMethodId + AirPollutantCode + DataAggregationProcessId"
+    ModellingResults ||--o{ ComplianceAssessmentMethod : "CountryCode + AssessmentMethodId + AirPollutantCode + DataAggregationProcessId"
+    ModellingResults ||--o{ MeasurementResults : "CountryCode + AssessmentMethodId + AirPollutantCode"
+    ModellingResults ||--o{ Model : "CountryCode + AssessmentMethodId + AirPollutantCode + DataAggregationProcessId"
+    ModellingResults ||--o{ PlanScenario : "CountryCode + AssessmentMethodId + AirPollutantCode + DataAggregationProcessId"
 
-    reporting_PlanScenario {
+    PlanScenario {
         nvarchar CountryCode PK
         nvarchar ScenarioId PK
         nvarchar PlanId PK
@@ -160,11 +160,11 @@ erDiagram
         varchar AuthorityLevel
         nvarchar SupportingDocumentation
     }
-    reporting_PlanScenario ||--o{ reporting_ComplianceAssessmentMethod : "via CompliancePlanLink (CountryCode + PlanId + ScenarioId)"
-    reporting_PlanScenario ||--o{ reporting_SourceApportionment : "via CompliancePlanLink (CountryCode + PlanId + ScenarioId)"
-    reporting_PlanScenario ||--o{ reporting_Measure : "via ScenarioMeasure (CountryCode + PlanId + ScenarioId)"
+    PlanScenario ||--o{ ComplianceAssessmentMethod : "via CompliancePlanLink (CountryCode + PlanId + ScenarioId)"
+    PlanScenario ||--o{ SourceApportionment : "via CompliancePlanLink (CountryCode + PlanId + ScenarioId)"
+    PlanScenario ||--o{ Measure : "via ScenarioMeasure (CountryCode + PlanId + ScenarioId)"
 
-    reporting_SamplingPoint {
+    SamplingPoint {
         varchar CountryCode PK
         nvarchar AssessmentMethodId PK
         nvarchar ProcessId PK
@@ -177,7 +177,7 @@ erDiagram
         numeric Longitude
         datetime2 ProcessActivityEnd
     }
-    reporting_SamplingPoint_SRA {
+    SamplingPoint_SRA {
         varchar CountryCode PK
         nvarchar SamplingPointRepresentativenessAreaId PK
         float X PK
@@ -185,9 +185,9 @@ erDiagram
         int SpatialResolution
         varchar AssessmentMethodId
     }
-    reporting_SamplingPoint_SRA ||--o{ reporting_ComplianceAssessmentMethod : "CountryCode + AssessmentMethodId + SamplingPointRepresentativenessAreaId"
+    SamplingPoint_SRA ||--o{ ComplianceAssessmentMethod : "CountryCode + AssessmentMethodId + SamplingPointRepresentativenessAreaId"
 
-    reporting_SamplingProcess {
+    SamplingProcess {
         nvarchar ProcessId PK
         varchar CountryCode PK
         int AirPollutantCode
@@ -204,16 +204,16 @@ erDiagram
         nvarchar EquivalenceDemonstrationReport
         nvarchar Documentation
     }
-    reporting_ScenarioMeasure {
+    ScenarioMeasure {
         nvarchar CountryCode PK
         nvarchar ScenarioId PK
         nvarchar MeasureGroupId PK
         float MeasureGroupAirPollutionReduction
         int AssessmentMethodId
     }
-    reporting_ScenarioMeasure ||--o{ reporting_PlanScenario : "CountryCode + ScenarioId + MeasureGroupId"
+    ScenarioMeasure ||--o{ PlanScenario : "CountryCode + ScenarioId + MeasureGroupId"
 
-    reporting_SourceApportionment {
+    SourceApportionment {
         nvarchar CountryCode PK
         nvarchar SourceAppId PK
         int AirPollutantCode PK
@@ -222,18 +222,18 @@ erDiagram
         varchar SourceSector
         float Contribution
     }
-    reporting_SourceApportionment ||--o{ reporting_ComplianceAssessmentMethod : "via CompliancePlanLink (CountryCode + SourceAppId to AttainmentId)"
+    SourceApportionment ||--o{ ComplianceAssessmentMethod : "via CompliancePlanLink (CountryCode + SourceAppId to AttainmentId)"
 
-    reporting_Station {
+    Station {
         varchar CountryCode PK
         nvarchar AirQualityStationEoICode PK
         nvarchar AQStationName
         nvarchar AirQualityStationArea
     }
-    reporting_Zone {
+    Zone {
         char CountryCode PK
         char ZoneId PK
         nvarchar ZoneGeometry
     }
-    reporting_Zone ||--o{ reporting_AssessmentRegime : "CountryCode + ZoneId"
+    Zone ||--o{ AssessmentRegime : "CountryCode + ZoneId"
 ```

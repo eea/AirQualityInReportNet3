@@ -1,6 +1,6 @@
 ```mermaid
 erDiagram
-    reference_Adjustment {
+    Adjustment {
     nvarchar CountryCode PK
     varchar ComplianceId PK
     nvarchar DeductionAssessmentMethodId PK
@@ -12,10 +12,10 @@ erDiagram
     nvarchar AdjustmentSource
     decimal MaxRatioUncertainty
     }
-    reference_Adjustment }o--o{ reference_ComplianceAssessmentMethod : "CountryCode + ComplianceId + DeductionAssessmentMethodId"
-    reference_Adjustment }o--o{ reference_Model : "CountryCode + ComplianceId + DeductionAssessmentMethodId"
+    Adjustment }o--o{ ComplianceAssessmentMethod : "CountryCode + ComplianceId + DeductionAssessmentMethodId"
+    Adjustment }o--o{ Model : "CountryCode + ComplianceId + DeductionAssessmentMethodId"
 
-    reference_AdminBoundaryGrid {
+    AdminBoundaryGrid {
     smallint adm_id
     bigint GridNum100m
     bigint GridNum10km
@@ -23,7 +23,7 @@ erDiagram
     int Year
     int Population
     }
-    reference_AdminBoundaryLookup_adm_eea39_2021 {
+    AdminBoundaryLookup_adm_eea39_2021 {
     smallint adm_id
     nvarchar ICC
     nvarchar adm_country
@@ -51,7 +51,7 @@ erDiagram
     nvarchar NUTS_EU
     nvarchar TAA
     }
-    reference_AssessmentRegime {
+    AssessmentRegime {
     varchar DataAggregationProcessId PK
     varchar CountryCode PK
     int ReportingYear PK
@@ -83,8 +83,8 @@ erDiagram
     int NrOfSPOsForObjectiveEstimation
     int NrOfModels
     }
-    reference_AssessmentRegime ||--o{ reference_ComplianceAssessmentMethod : "DataAggregationProcessId + CountryCode + ReportingYear + AssessmentRegimeId"
-    reference_Authority {
+    AssessmentRegime ||--o{ ComplianceAssessmentMethod : "DataAggregationProcessId + CountryCode + ReportingYear + AssessmentRegimeId"
+    Authority {
     nvarchar CountryCode PK
     nvarchar AuthorityInstanceId PK
     int Object PK
@@ -99,9 +99,9 @@ erDiagram
     nvarchar PersonEmail
     datetime ReportingTime
     }
-    reference_Authority ||--o{ reference_SamplingPoint : "network (CountryCode + AuthorityInstanceId + Object + PersonEmail)"
-    reference_Authority ||--o{ reference_AssessmentRegime : "zone, nuts (CountryCode + AuthorityInstanceId + Object + PersonEmail)"
-    reference_ComplianceAssessmentMethod {
+    Authority ||--o{ SamplingPoint : "network (CountryCode + AuthorityInstanceId + Object + PersonEmail)"
+    Authority ||--o{ AssessmentRegime : "zone, nuts (CountryCode + AuthorityInstanceId + Object + PersonEmail)"
+    ComplianceAssessmentMethod {
     varchar CountryCode PK
     varchar AssessmentRegimeId PK
     varchar DataAggregationProcessId PK
@@ -130,9 +130,9 @@ erDiagram
     varchar EEA_Exceedance_Assessment
     float EEA_estimationOfMQI
     }
-    reference_ComplianceAssessmentMethod ||--o{ reference_SamplingPoint_SRA : "CountryCode + AssessmentRegimeId + DataAggregationProcessId + AssessmentMethodId + AttainmentId"
-    %% Ambiguity: The document mentions a relation to "PLAN", but no table named "PLAN" exists. It might refer to "reference_PlanScenario" or another table. This needs clarification before adding the relationship.
-    reference_CompliancePlanLink {
+    ComplianceAssessmentMethod ||--o{ SamplingPoint_SRA : "CountryCode + AssessmentRegimeId + DataAggregationProcessId + AssessmentMethodId + AttainmentId"
+    %% Ambiguity: The document mentions a relation to "PLAN", but no table named "PLAN" exists. It might refer to "PlanScenario" or another table. This needs clarification before adding the relationship.
+    CompliancePlanLink {
     varchar CountryCode PK
     varchar ComplianceId PK
     nvarchar PlanId PK
@@ -141,7 +141,7 @@ erDiagram
     nvarchar Country
     int ReportingYear
     }
-    reference_GridZone {
+    GridZone {
     char CountryCode PK
     char ZoneId PK
     float X PK
@@ -150,7 +150,7 @@ erDiagram
     bigint GridNum1km
     bigint GridNum10km
     }
-    reference_Measure {
+    Measure {
     nvarchar Country
     nvarchar CountryCode PK
     nvarchar MeasureGroupId
@@ -169,7 +169,7 @@ erDiagram
     int ReasonIfMeasureNotUsed
     datetime ReportingTime PK
     }
-    reference_MeasurementResults {
+    MeasurementResults {
     varchar CountryCode PK
     date Start PK
     nvarchar SamplingPointRef
@@ -188,7 +188,7 @@ erDiagram
     nvarchar DataAggregationProcess
     varchar SourceDataFlow
     }
-    reference_Model {
+    Model {
     varchar CountryCode PK
     nvarchar AssessmentMethodId PK
     int AirPollutantCode PK
@@ -208,11 +208,11 @@ erDiagram
     nvarchar DataQualityReportURL
     decimal MQI
     }
-    reference_Model ||--o{ reference_ModellingResults : "CountryCode + AssessmentMethodId + AirPollutantCode + DataAggregationProcessId"
-    reference_Model ||--o{ reference_PlanScenario : "CountryCode + AssessmentMethodId + AirPollutantCode + DataAggregationProcessId"
-    reference_Model ||--o{ reference_ComplianceAssessmentMethod : "CountryCode + AssessmentMethodId + AirPollutantCode + DataAggregationProcessId"
-    reference_Model ||--o{ reference_SamplingPoint_SRA : "CountryCode + AssessmentMethodId + AirPollutantCode + DataAggregationProcessId"
-    reference_ModellingResults {
+    Model ||--o{ ModellingResults : "CountryCode + AssessmentMethodId + AirPollutantCode + DataAggregationProcessId"
+    Model ||--o{ PlanScenario : "CountryCode + AssessmentMethodId + AirPollutantCode + DataAggregationProcessId"
+    Model ||--o{ ComplianceAssessmentMethod : "CountryCode + AssessmentMethodId + AirPollutantCode + DataAggregationProcessId"
+    Model ||--o{ SamplingPoint_SRA : "CountryCode + AssessmentMethodId + AirPollutantCode + DataAggregationProcessId"
+    ModellingResults {
     varchar CountryCode PK
     varchar AssessmentMethodId PK
     int AirPollutantCode PK
@@ -235,7 +235,7 @@ erDiagram
     bigint GridNum1km
     bigint GridNum10km
     }
-    reference_PlanScenario {
+    PlanScenario {
     nvarchar Country
     nvarchar CountryCode PK
     nvarchar ScenarioId PK
@@ -255,10 +255,10 @@ erDiagram
     varchar AuthorityLevel
     nvarchar SupportingDocumentationURL
     }
-    reference_PlanScenario }o--o{ reference_ComplianceAssessmentMethod : "via CompliancePlanLink (CountryCode + PlanId + ScenarioId to AttainmentId)"
-    reference_PlanScenario }o--o{ reference_SourceApportionment : "via CompliancePlanLink (CountryCode + PlanId + ScenarioId to SourceAppId)"
-    reference_PlanScenario }o--o{ reference_Measure : "via ScenarioMeasure (CountryCode + PlanId + ScenarioId to MeasureId)"
-    reference_SamplingPoint {
+    PlanScenario }o--o{ ComplianceAssessmentMethod : "via CompliancePlanLink (CountryCode + PlanId + ScenarioId to AttainmentId)"
+    PlanScenario }o--o{ SourceApportionment : "via CompliancePlanLink (CountryCode + PlanId + ScenarioId to SourceAppId)"
+    PlanScenario }o--o{ Measure : "via ScenarioMeasure (CountryCode + PlanId + ScenarioId to MeasureId)"
+    SamplingPoint {
     varchar CountryCode PK
     nvarchar AssessmentMethodId PK
     nvarchar ProcessId PK
@@ -284,12 +284,12 @@ erDiagram
     bigint GridNum10km
     datetime ReportingTime
     }
-    reference_SamplingPoint ||--|| reference_SamplingProcess : "CountryCode + AssessmentMethodId + ProcessId + ProcessActivityBegin"
-    reference_SamplingPoint }o--o{ reference_MeasurementResults : "CountryCode + AssessmentMethodId + ProcessId + ProcessActivityBegin"
-    reference_SamplingPoint }o--o{ reference_ComplianceAssessmentMethod : "CountryCode + AssessmentMethodId + ProcessId + ProcessActivityBegin"
-    reference_SamplingPoint }o--o{ reference_AssessmentRegime : "via ComplianceAssessmentMethod (CountryCode + AssessmentMethodId + ProcessId + ProcessActivityBegin)"
-    reference_SamplingPoint }o--o{ reference_SamplingPoint_SRA : "via ComplianceAssessmentMethod (CountryCode + AssessmentMethodId + ProcessId + ProcessActivityBegin)"
-    reference_SamplingPoint_SRA {
+    SamplingPoint ||--|| SamplingProcess : "CountryCode + AssessmentMethodId + ProcessId + ProcessActivityBegin"
+    SamplingPoint }o--o{ MeasurementResults : "CountryCode + AssessmentMethodId + ProcessId + ProcessActivityBegin"
+    SamplingPoint }o--o{ ComplianceAssessmentMethod : "CountryCode + AssessmentMethodId + ProcessId + ProcessActivityBegin"
+    SamplingPoint }o--o{ AssessmentRegime : "via ComplianceAssessmentMethod (CountryCode + AssessmentMethodId + ProcessId + ProcessActivityBegin)"
+    SamplingPoint }o--o{ SamplingPoint_SRA : "via ComplianceAssessmentMethod (CountryCode + AssessmentMethodId + ProcessId + ProcessActivityBegin)"
+    SamplingPoint_SRA {
     varchar CountryCode PK
     nvarchar SamplingPointRepresentativenessAreaId PK
     float X PK
@@ -301,7 +301,7 @@ erDiagram
     bigint GridNum1km
     varchar AssessmentMethodId
     }
-    reference_SamplingProcess {
+    SamplingProcess {
     nvarchar ProcessId PK
     varchar CountryCode PK
     varchar Country
@@ -320,7 +320,7 @@ erDiagram
     nvarchar EquivalenceDemonstrationReportURL
     nvarchar DocumentationURL
     }
-    reference_ScenarioMeasure {
+    ScenarioMeasure {
     nvarchar Country
     nvarchar CountryCode PK
     nvarchar ScenarioId PK
@@ -332,7 +332,7 @@ erDiagram
     float MeasureGroupAirPollutionReduction
     int AssessmentMethodId
     }
-    reference_SourceApportionment {
+    SourceApportionment {
     nvarchar CountryCode PK
     nvarchar SourceAppId PK
     nvarchar Country
@@ -343,9 +343,9 @@ erDiagram
     varchar SourceSector
     float Contribution
     }
-    reference_SourceApportionment ||--o{ reference_ComplianceAssessmentMethod : "via CompliancePlanLink (CountryCode + SourceAppId to AttainmentId)"
+    SourceApportionment ||--o{ ComplianceAssessmentMethod : "via CompliancePlanLink (CountryCode + SourceAppId to AttainmentId)"
     %% Note: The relationship is mediated through the CompliancePlanLink table. Each SourceApportionment may apply to several AttainmentIds, but each AttainmentId should only have one SourceApportionment.
-    reference_Station {
+    Station {
     varchar Country
     varchar CountryCode PK
     char City
@@ -360,8 +360,8 @@ erDiagram
     nvarchar AirQualityStationArea
     datetime ReportingTime
     }
-    reference_Station ||--o{ reference_SamplingPoint : "CountryCode"
-    reference_Vocabulary {
+    Station ||--o{ SamplingPoint : "CountryCode"
+    Vocabulary {
     varchar vocabulary
     varchar Notation
     varchar URI
@@ -373,17 +373,17 @@ erDiagram
     date AcceptedDate
     date NotAcceptedDate
     }
-    reference_VocabularyRelations {
+    VocabularyRelations {
     varchar Vocabulary
     varchar RelatedVocabulary
     varchar Concept_notation
     varchar Related_notation
     }
-    reference_Zone {
+    Zone {
     char CountryCode PK
     char ZoneId PK
     varbinary ZoneGeometry
     }
-    reference_Zone ||--o{ reference_AssessmentRegime : "CountryCode + ZoneId"
-    reference_Zone ||--o{ reference_GridZone : "CountryCode + ZoneId"
+    Zone ||--o{ AssessmentRegime : "CountryCode + ZoneId"
+    Zone ||--o{ GridZone : "CountryCode + ZoneId"
 ```
