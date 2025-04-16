@@ -1,9 +1,248 @@
 ```mermaid
 erDiagram
-    Adjustment {
-    nvarchar CountryCode PK
-    varchar ComplianceId PK
-    nvarchar DeductionAssessmentMethodId PK
+
+AUTHORITY {
+    nvarchar Country
+    nvarchar CountryCode
+    nvarchar AuthorityInstance
+    nvarchar AuthorityInstanceId
+    int Object
+    nvarchar OrganisationName
+    nvarchar OrganisationURL
+    nvarchar OrganisationAddress
+    nvarchar PersonName
+    nvarchar PersonEmail
+    datetime ReportingTime
+}
+
+STATION {
+    varchar Country
+    varchar CountryCode
+    char City
+    varchar CityCode
+    nvarchar AirQualityNetwork
+    nvarchar AirQualityNetworkName
+    int AirQualityNetworkOrganisationalLevel
+    nvarchar Timezone
+    nvarchar AirQualityStationEoICode
+    nvarchar AirQualityStationNatCode
+    nvarchar AQStationName
+    nvarchar AirQualityStationArea
+    datetime ReportingTime
+}
+STATION ||--o{ SAMPLINGPOINT : "CountryCode + AirQualityStationEoICode"
+
+SAMPLINGPOINT {
+    varchar Country
+    varchar CountryCode
+    nvarchar AirQualityStationEoICode
+    nvarchar AssessmentMethodId
+    nvarchar SamplingPointRef
+    nvarchar AirPollutant
+    int AirPollutantCode
+    nvarchar AirQualityStationType
+    int SuperSite
+    numeric Latitude
+    numeric Longitude
+    nvarchar ProcessId
+    datetime2 ProcessActivityBegin
+    datetime2 ProcessActivityEnd
+    varchar SamplingPointStatus
+    float X
+    float Y
+    bigint GridNum10m
+    bigint GridNum100m
+    bigint GridNum1km
+    bigint GridNum10km
+    datetime ReportingTime
+}
+SAMPLINGPOINT ||--|| SAMPLINGPROCESS : "CountryCode + ProcessId"
+SAMPLINGPOINT }o--o{ MEASUREMENTRESULTS : "CountryCode + AirPollutantCode + AssessmentMethodId"
+SAMPLINGPOINT }o--o{ COMPLIANCEASSESSMENTMETHOD : "CountryCode + AirPollutantCode + AssessmentMethodId + DataAggregationProcessId to ProcessId"
+
+SAMPLINGPROCESS {
+    varchar Country
+    varchar CountryCode
+    nvarchar AirPollutant
+    int AirPollutantCode
+    nvarchar ProcessId
+    nvarchar MeasurementType
+    nvarchar MeasurementMethod
+    nvarchar MeasurementEquipment
+    nvarchar SamplingMethod
+    int SamplingEquipment
+    nvarchar AnalyticalTechnique
+    nvarchar EquivalenceDemonstrated
+    nvarchar DetectionLimit
+    nvarchar DetectionLimitUnit
+    nvarchar QAReportURL
+    nvarchar EquivalenceDemonstrationReportURL
+    nvarchar DocumentationURL
+}
+
+MEASUREMENTRESULTS {
+    varchar CountryCode
+    nvarchar SamplingPointRef
+    nvarchar AirPollutant
+    int AirPollutantCode
+    date Start
+    date End
+    numeric Value
+    nvarchar Unit
+    nvarchar ObservationFrequency
+    int Validity
+    int Verification
+    numeric DataCapture
+    datetime2 ResultTime
+    numeric DataCoverage
+    nvarchar DataAggregationProcessId
+    nvarchar DataAggregationProcess
+    varchar SourceDataFlow
+}
+
+SAMPLINGPOINT_SRA {
+    varchar CountryCode
+    nvarchar SamplingPointRepresentativenessAreaId
+    float X
+    float Y
+    int SpatialResolution
+    bigint GridNum10m
+    bigint GridNum100m
+    bigint GridNum10km
+    bigint GridNum1km
+    varchar AssessmentMethodId
+}
+SAMPLINGPOINT }o--o{ COMPLIANCEASSESSMENTMETHOD : "CountryCode + AssessmentMethodId + SamplingPointRepresentativenessAreaId"
+
+MODELLINGRESULTS {
+    varchar CountryCode
+    varchar AssessmentMethodId
+    varchar AirPollutant
+    int AirPollutantCode
+    datetime Start
+    datetime End
+    decimal Value
+    varchar Unit
+    int Validity
+    int Verification
+    datetime ResultTime
+    varchar DataAggregationProcessId
+    varchar DataAggregationProcess
+    varchar SourceDataFlow
+    float X
+    float Y
+    int SpatialResolution
+    int GridNum10m
+    int GridNum100m
+    bigint GridNum1km
+    bigint GridNum10km
+}
+
+MODEL {
+    varchar Country
+    varchar CountryCode
+    nvarchar AssessmentMethodId
+    varchar AssessmentMethodName
+    nvarchar AssessmentType
+    nvarchar AirPollutant
+    int AirPollutantCode
+    varchar DataAggregationProcessId
+    nvarchar DataAggregationProcess
+    nvarchar ResultEncoding
+    nvarchar ModelApplication
+    nvarchar ModelReportURL
+    nvarchar DataQualityReportURL
+    decimal MQI
+}
+MODEL ||--o{ COMPLIANCEASSESSMENTMETHOD : "CountryCode + AssessmentMethodId + AirPollutantCode + DataAggregationProcessId"
+MODEL ||--o{ MODELLINGRESULTS : "CountryCode + AssessmentMethodId + AirPollutantCode + DataAggregationProcessId"
+MODEL ||--o{ PLANSCENARIO : "CountryCode + AssessmentMethodId + AirPollutantCode + DataAggregationProcessId"
+MODEL ||--o{ SAMPLINGPOINT_SRA : "CountryCode + AssessmentMethodId"
+
+ZONE {
+    char CountryCode PK
+    char ZoneId PK
+    nvarchar ZoneGeometry
+}
+ZONE ||--o{ ASSESSMENTREGIME : "CountryCode + ZoneId"
+ZONE ||--o{ GRIDZONE : "CountryCode + ZoneId"
+
+GRIDZONE {
+    char CountryCode
+    char ZoneId
+    float X
+    float Y
+    bigint GridNum100m
+    bigint GridNum1km
+    bigint GridNum10km
+}
+
+ASSESSMENTREGIME {
+    nvarchar Country
+    varchar CountryCode
+    int ReportingYear
+    varchar AssessmentRegimeId
+    varchar ZoneId
+    nvarchar ZoneCode
+    decimal ZoneArea
+    varchar ZoneCategory
+    nvarchar ZoneType
+    varchar ZoneName
+    nvarchar AirPollutant
+    int AirPollutantCode
+    nvarchar ProtectionTarget
+    nvarchar ObjectiveType
+    nvarchar ReportingMetric
+    varchar DataAggregationProcess
+    varchar DataAggregationProcessId
+    nvarchar AssessmentThresholdExceedance
+    int PostponementYear
+    int FixedSPOReduction
+    int ZoneResidentPopulationYear
+    int ZoneResidentPopulation
+    int ClassificationYear
+    varchar ClassificationReportURL
+    int RequiredNrOfSamplingPoints
+    int NrOfFixedSPOs
+    int NrOfFixedRandomSPOs
+    int NrOfIndicativeSPOs
+    int NrOfSPOsForObjectiveEstimation
+    int NrOfModels
+}
+ASSESSMENTREGIME ||--o{ COMPLIANCEASSESSMENTMETHOD : "CountryCode + ReportingYear + AssessmentRegimeId + DataAggregationProcessId"
+
+COMPLIANCEASSESSMENTMETHOD {
+    nvarchar Country
+    varchar CountryCode
+    int ReportingYear
+    varchar AssessmentRegimeId
+    nvarchar AirPollutant
+    int AirPollutantCode
+    nvarchar DataAggregationProcessId
+    nvarchar AssessmentType
+    varchar AssessmentMethod
+    int HotSpot
+    nvarchar AssessmentMethodId
+    varchar IsExceedance
+    decimal AirPollutionLevel
+    decimal AirPollutionLevelAdjusted
+    decimal AbsoluteUncertaintyLimit
+    decimal RelativeUncertaintyLimit
+    decimal MaxRatioUncertainty
+    char CorrectionFactor
+    varchar AttainmentId
+    varchar ComplianceId
+    nvarchar SamplingPointRepresentativenessAreaId
+    nvarchar PreliminaryReason
+    decimal EEA_AirPollutionLevel
+    decimal EEA_AirPollutionLevelAdjusted
+    varchar EEA_Exceedance_Assessment
+    float EEA_estimationOfMQI
+}
+COMPLIANCEASSESSMENTMETHOD }o--o{ COMPLIANCEPLANLINK : "CountryCode + PlanId + ScenarioId"
+COMPLIANCEASSESSMENTMETHOD }o--o{ SAMPLINGPOINT_SRA : "CountryCode + AssessmentMethodId + SamplingPointRepresentativenessAreaId"
+
+ADJUSTMENT {
     nvarchar Country
     varchar CountryCode
     varchar ComplianceId
@@ -11,19 +250,103 @@ erDiagram
     nvarchar AdjustmentType
     nvarchar AdjustmentSource
     decimal MaxRatioUncertainty
-    }
-    Adjustment }o--o{ ComplianceAssessmentMethod : "CountryCode + ComplianceId + DeductionAssessmentMethodId"
-    Adjustment }o--o{ Model : "CountryCode + ComplianceId + DeductionAssessmentMethodId"
+}
+ADJUSTMENT }o--o{ COMPLIANCEASSESSMENTMETHOD : "CountryCode + ComplianceId + DeductionAssessmentMethod"
+ADJUSTMENT }o--o{ MODEL : "CountryCode + ComplianceId + DeductionAssessmentMethod"
 
-    AdminBoundaryGrid {
+PLANSCENARIO {
+    nvarchar Country
+    nvarchar CountryCode
+    nvarchar ScenarioId
+    nvarchar ScenarioCode
+    nvarchar AirPollutant
+    nvarchar AirPollutantCode
+    varchar DataAggregationProcess
+    varchar DataAggregationProcessId
+    varchar ScenarioCategory
+    int ScenarioYear
+    float ScenarioAirPollutionLevel
+    int AssessmentMethodId
+    nvarchar PlanId
+    varchar PlanCategory
+    nvarchar AuthorityOrganisation
+    nvarchar AuthorityWebsite
+    varchar AuthorityLevel
+    nvarchar SupportingDocumentationURL
+}
+PLANSCENARIO ||--o{ COMPLIANCEPLANLINK : "CountryCode + PlanId + ScenarioId"
+PLANSCENARIO ||--o{ COMPLIANCEPLANLINK : "CountryCode + PlanId + ScenarioId"
+PLANSCENARIO ||--o{ SCENARIOMEASURE : "CountryCode + PlanId + ScenarioId"
+
+COMPLIANCEPLANLINK {
+    nvarchar Country
+    varchar CountryCode
+    int ReportingYear
+    varchar ComplianceId
+    nvarchar PlanId
+    nvarchar SourceAppId
+    nvarchar ScenarioId
+}
+
+MEASURE {
+    nvarchar Country
+    nvarchar CountryCode
+    nvarchar MeasureGroupId
+    nvarchar MeasureId
+    nvarchar MeasureCode
+    nvarchar MeasureName
+    nvarchar MeasureClassification
+    nvarchar MeasureType
+    nvarchar SourceSector
+    nvarchar SpatialScale
+    date ImplementationBegin
+    date ImplementationEnd
+    bigint Cost
+    date FullEffectDate
+    varchar MeasureStatus
+    int ReasonIfMeasureNotUsed
+    datetime ReportingTime
+}
+
+SCENARIOMEASURE {
+    nvarchar Country
+    nvarchar CountryCode
+    nvarchar ScenarioId
+    nvarchar AirPollutant
+    nvarchar AirPollutantCode
+    varchar DataAggregationProcess
+    varchar DataAggregationProcessId
+    nvarchar MeasureGroupId
+    float MeasureGroupAirPollutionReduction
+    int AssessmentMethodId
+}
+SCENARIOMEASURE ||--o{ PLANSCENARIO : "CountryCode + ScenarioId + MeasureGroupId"
+SCENARIOMEASURE ||--o{ MEASURE : "CountryCode + PlanId + ScenarioId"
+
+SOURCEAPPORTIONMENT {
+    nvarchar Country
+    nvarchar CountryCode
+    nvarchar SourceAppId
+    nvarchar AirPollutant
+    int AirPollutantCode
+    varchar ContributionType
+    varchar SpatialScale
+    varchar SourceSector
+    float Contribution
+}
+SOURCEAPPORTIONMENT ||--o{ COMPLIANCEPLANLINK : "CountryCode + SourceAppId to AttainmentId"
+
+ADMINBOUNDARYGRID {
     smallint adm_id
     bigint GridNum100m
     bigint GridNum10km
     bigint GridNum1km
     int Year
     int Population
-    }
-    AdminBoundaryLookup_adm_eea39_2021 {
+}
+ADMINBOUNDARYGRID ||--|| ADMINBOUNDARYLOOKUP_ADM_EEA39_2021 : "adm_id"
+
+ADMINBOUNDARYLOOKUP_ADM_EEA39_2021 {
     smallint adm_id
     nvarchar ICC
     nvarchar adm_country
@@ -50,318 +373,17 @@ erDiagram
     tinyint EFTA4
     nvarchar NUTS_EU
     nvarchar TAA
-    }
-    AssessmentRegime {
-    varchar DataAggregationProcessId PK
-    varchar CountryCode PK
-    int ReportingYear PK
-    varchar AssessmentRegimeId PK
-    nvarchar Country
-    varchar ZoneId
-    nvarchar ZoneCode
-    decimal ZoneArea
-    varchar ZoneCategory
-    nvarchar ZoneType
-    varchar ZoneName
-    nvarchar AirPollutant
-    int AirPollutantCode
-    nvarchar ProtectionTarget
-    nvarchar ObjectiveType
-    nvarchar ReportingMetric
-    varchar DataAggregationProcess
-    nvarchar AssessmentThresholdExceedance
-    int PostponementYear
-    int FixedSPOReduction
-    int ZoneResidentPopulationYear
-    int ZoneResidentPopulation
-    int ClassificationYear
-    varchar ClassificationReportURL
-    int RequiredNrOfSamplingPoints
-    int NrOfFixedSPOs
-    int NrOfFixedRandomSPOs
-    int NrOfIndicativeSPOs
-    int NrOfSPOsForObjectiveEstimation
-    int NrOfModels
-    }
-    AssessmentRegime ||--o{ ComplianceAssessmentMethod : "DataAggregationProcessId + CountryCode + ReportingYear + AssessmentRegimeId"
-    Authority {
-    nvarchar CountryCode PK
-    nvarchar AuthorityInstanceId PK
-    int Object PK
-    nvarchar PersonEmail PK
-    nvarchar Country
-    nvarchar AuthorityInstance
-    int Object
-    nvarchar OrganisationName
-    nvarchar OrganisationURL
-    nvarchar OrganisationAddress
-    nvarchar PersonName
-    nvarchar PersonEmail
-    datetime ReportingTime
-    }
-    Authority ||--o{ SamplingPoint : "network (CountryCode + AuthorityInstanceId + Object + PersonEmail)"
-    Authority ||--o{ AssessmentRegime : "zone, nuts (CountryCode + AuthorityInstanceId + Object + PersonEmail)"
-    ComplianceAssessmentMethod {
-    varchar CountryCode PK
-    varchar AssessmentRegimeId PK
-    varchar DataAggregationProcessId PK
-    nvarchar AssessmentMethodId PK
-    varchar AttainmentId PK
-    nvarchar Country
-    int ReportingYear
-    nvarchar AirPollutant
-    int AirPollutantCode
-    nvarchar AssessmentType
-    varchar AssessmentMethod
-    int HotSpot
-    nvarchar AssessmentMethodId
-    varchar IsExceedance
-    decimal AirPollutionLevel
-    decimal AirPollutionLevelAdjusted
-    decimal AbsoluteUncertaintyLimit
-    decimal RelativeUncertaintyLimit
-    decimal MaxRatioUncertainty
-    char CorrectionFactor
-    varchar ComplianceId
-    nvarchar SamplingPointRepresentativenessAreaId
-    nvarchar PreliminaryReason
-    decimal EEA_AirPollutionLevel
-    decimal EEA_AirPollutionLevelAdjusted
-    varchar EEA_Exceedance_Assessment
-    float EEA_estimationOfMQI
-    }
-    ComplianceAssessmentMethod ||--o{ SamplingPoint_SRA : "CountryCode + AssessmentRegimeId + DataAggregationProcessId + AssessmentMethodId + AttainmentId"
-    %% Ambiguity: The document mentions a relation to "PLAN", but no table named "PLAN" exists. It might refer to "PlanScenario" or another table. This needs clarification before adding the relationship.
-    CompliancePlanLink {
-    varchar CountryCode PK
-    varchar ComplianceId PK
-    nvarchar PlanId PK
-    nvarchar SourceAppId PK
-    nvarchar ScenarioId PK
-    nvarchar Country
-    int ReportingYear
-    }
-    GridZone {
-    char CountryCode PK
-    char ZoneId PK
-    float X PK
-    float Y PK
-    bigint GridNum100m
-    bigint GridNum1km
-    bigint GridNum10km
-    }
-    Measure {
-    nvarchar Country
-    nvarchar CountryCode PK
-    nvarchar MeasureGroupId
-    nvarchar MeasureId PK
-    nvarchar MeasureCode
-    nvarchar MeasureName
-    nvarchar MeasureClassification
-    nvarchar MeasureType
-    nvarchar SourceSector
-    nvarchar SpatialScale
-    date ImplementationBegin
-    date ImplementationEnd
-    bigint Cost
-    date FullEffectDate
-    varchar MeasureStatus
-    int ReasonIfMeasureNotUsed
-    datetime ReportingTime PK
-    }
-    MeasurementResults {
-    varchar CountryCode PK
-    date Start PK
-    nvarchar SamplingPointRef
-    nvarchar AirPollutant
-    int AirPollutantCode
-    date End
-    numeric Value
-    nvarchar Unit
-    nvarchar ObservationFrequency
-    int Validity
-    int Verification
-    numeric DataCapture
-    datetime2 ResultTime
-    numeric DataCoverage
-    nvarchar DataAggregationProcessId
-    nvarchar DataAggregationProcess
-    varchar SourceDataFlow
-    }
-    Model {
-    varchar CountryCode PK
-    nvarchar AssessmentMethodId PK
-    int AirPollutantCode PK
-    varchar DataAggregationProcessId PK
-    varchar Country
-    varchar CountryCode
-    nvarchar AssessmentMethodId
-    varchar AssessmentMethodName
-    nvarchar AssessmentType
-    nvarchar AirPollutant
-    int AirPollutantCode
-    varchar DataAggregationProcessId
-    nvarchar DataAggregationProcess
-    nvarchar ResultEncoding
-    nvarchar ModelApplication
-    nvarchar ModelReportURL
-    nvarchar DataQualityReportURL
-    decimal MQI
-    }
-    Model ||--o{ ModellingResults : "CountryCode + AssessmentMethodId + AirPollutantCode + DataAggregationProcessId"
-    Model ||--o{ PlanScenario : "CountryCode + AssessmentMethodId + AirPollutantCode + DataAggregationProcessId"
-    Model ||--o{ ComplianceAssessmentMethod : "CountryCode + AssessmentMethodId + AirPollutantCode + DataAggregationProcessId"
-    Model ||--o{ SamplingPoint_SRA : "CountryCode + AssessmentMethodId + AirPollutantCode + DataAggregationProcessId"
-    ModellingResults {
-    varchar CountryCode PK
-    varchar AssessmentMethodId PK
-    int AirPollutantCode PK
-    datetime Start PK
-    varchar DataAggregationProcessId PK
-    float X PK
-    float Y PK
-    varchar AirPollutant
-    datetime End
-    decimal Value
-    varchar Unit
-    int Validity
-    int Verification
-    datetime ResultTime
-    varchar DataAggregationProcess
-    varchar SourceDataFlow
-    int SpatialResolution
-    int GridNum10m
-    int GridNum100m
-    bigint GridNum1km
-    bigint GridNum10km
-    }
-    PlanScenario {
-    nvarchar Country
-    nvarchar CountryCode PK
-    nvarchar ScenarioId PK
-    nvarchar ScenarioCode
-    nvarchar AirPollutant
-    nvarchar AirPollutantCode
-    varchar DataAggregationProcess
-    varchar DataAggregationProcessId
-    varchar ScenarioCategory
-    int ScenarioYear
-    float ScenarioAirPollutionLevel
-    int AssessmentMethodId
-    nvarchar PlanId PK
-    varchar PlanCategory
-    nvarchar AuthorityOrganisation
-    nvarchar AuthorityWebsite
-    varchar AuthorityLevel
-    nvarchar SupportingDocumentationURL
-    }
-    PlanScenario }o--o{ ComplianceAssessmentMethod : "via CompliancePlanLink (CountryCode + PlanId + ScenarioId to AttainmentId)"
-    PlanScenario }o--o{ SourceApportionment : "via CompliancePlanLink (CountryCode + PlanId + ScenarioId to SourceAppId)"
-    PlanScenario }o--o{ Measure : "via ScenarioMeasure (CountryCode + PlanId + ScenarioId to MeasureId)"
-    SamplingPoint {
-    varchar CountryCode PK
-    nvarchar AssessmentMethodId PK
-    nvarchar ProcessId PK
-    datetime2 ProcessActivityBegin PK
-    varchar Country
-    nvarchar AirQualityStationEoICode
-    nvarchar SamplingPointRef
-    nvarchar AirPollutant
-    int AirPollutantCode
-    nvarchar AirQualityStationType
-    int SuperSite
-    numeric Latitude
-    numeric Longitude
-    nvarchar ProcessId
-    datetime2 ProcessActivityBegin
-    datetime2 ProcessActivityEnd
-    varchar SamplingPointStatus
-    float X
-    float Y
-    bigint GridNum10m
-    bigint GridNum100m
-    bigint GridNum1km
-    bigint GridNum10km
-    datetime ReportingTime
-    }
-    SamplingPoint ||--|| SamplingProcess : "CountryCode + AssessmentMethodId + ProcessId + ProcessActivityBegin"
-    SamplingPoint }o--o{ MeasurementResults : "CountryCode + AssessmentMethodId + ProcessId + ProcessActivityBegin"
-    SamplingPoint }o--o{ ComplianceAssessmentMethod : "CountryCode + AssessmentMethodId + ProcessId + ProcessActivityBegin"
-    SamplingPoint }o--o{ AssessmentRegime : "via ComplianceAssessmentMethod (CountryCode + AssessmentMethodId + ProcessId + ProcessActivityBegin)"
-    SamplingPoint }o--o{ SamplingPoint_SRA : "via ComplianceAssessmentMethod (CountryCode + AssessmentMethodId + ProcessId + ProcessActivityBegin)"
-    SamplingPoint_SRA {
-    varchar CountryCode PK
-    nvarchar SamplingPointRepresentativenessAreaId PK
-    float X PK
-    float Y PK
-    int SpatialResolution
-    bigint GridNum10m
-    bigint GridNum100m
-    bigint GridNum10km
-    bigint GridNum1km
-    varchar AssessmentMethodId
-    }
-    SamplingProcess {
-    nvarchar ProcessId PK
-    varchar CountryCode PK
-    varchar Country
-    nvarchar AirPollutant
-    int AirPollutantCode
-    nvarchar MeasurementType
-    nvarchar MeasurementMethod
-    nvarchar MeasurementEquipment
-    nvarchar SamplingMethod
-    int SamplingEquipment
-    nvarchar AnalyticalTechnique
-    nvarchar EquivalenceDemonstrated
-    nvarchar DetectionLimit
-    nvarchar DetectionLimitUnit
-    nvarchar QAReportURL
-    nvarchar EquivalenceDemonstrationReportURL
-    nvarchar DocumentationURL
-    }
-    ScenarioMeasure {
-    nvarchar Country
-    nvarchar CountryCode PK
-    nvarchar ScenarioId PK
-    nvarchar AirPollutant
-    nvarchar AirPollutantCode
-    varchar DataAggregationProcess
-    varchar DataAggregationProcessId
-    nvarchar MeasureGroupId PK
-    float MeasureGroupAirPollutionReduction
-    int AssessmentMethodId
-    }
-    SourceApportionment {
-    nvarchar CountryCode PK
-    nvarchar SourceAppId PK
-    nvarchar Country
-    nvarchar AirPollutant
-    int AirPollutantCode
-    varchar ContributionType
-    varchar SpatialScale
-    varchar SourceSector
-    float Contribution
-    }
-    SourceApportionment ||--o{ ComplianceAssessmentMethod : "via CompliancePlanLink (CountryCode + SourceAppId to AttainmentId)"
-    %% Note: The relationship is mediated through the CompliancePlanLink table. Each SourceApportionment may apply to several AttainmentIds, but each AttainmentId should only have one SourceApportionment.
-    Station {
-    varchar Country
-    varchar CountryCode PK
-    char City
-    varchar CityCode
-    nvarchar AirQualityNetwork
-    nvarchar AirQualityNetworkName
-    int AirQualityNetworkOrganisationalLevel
-    nvarchar Timezone
-    nvarchar AirQualityStationEoICode
-    nvarchar AirQualityStationNatCode
-    nvarchar AQStationName
-    nvarchar AirQualityStationArea
-    datetime ReportingTime
-    }
-    Station ||--o{ SamplingPoint : "CountryCode"
-    Vocabulary {
+}
+
+VOCABULARYRELATIONS {
+    varchar Vocabulary
+    varchar RelatedVocabulary
+    varchar Concept_notation
+    varchar Related_notation
+}
+VOCABULARYRELATIONS ||--o{ VOCABULARY : "vocabulary + Notation as Concept_notation"
+
+VOCABULARY {
     varchar vocabulary
     varchar Notation
     varchar URI
@@ -372,18 +394,7 @@ erDiagram
     date StatusModifiedDate
     date AcceptedDate
     date NotAcceptedDate
-    }
-    VocabularyRelations {
-    varchar Vocabulary
-    varchar RelatedVocabulary
-    varchar Concept_notation
-    varchar Related_notation
-    }
-    Zone {
-    char CountryCode PK
-    char ZoneId PK
-    varbinary ZoneGeometry
-    }
-    Zone ||--o{ AssessmentRegime : "CountryCode + ZoneId"
-    Zone ||--o{ GridZone : "CountryCode + ZoneId"
+}
 ```
+
+

@@ -13,6 +13,42 @@ AUTHORITY {
     nvarchar AuthorityStatus
 }
 
+STATION {
+    varchar CountryCode PK
+    nvarchar AirQualityStationEoICode PK
+    nvarchar AirQualityNetwork
+    nvarchar AirQualityNetworkName
+    nvarchar AirQualityNetworkOrganisationalLevel
+    nvarchar Timezone
+    nvarchar AirQualityStationNatCode
+    nvarchar AQStationName
+    nvarchar AirQualityStationArea
+}
+STATION ||--o{ SAMPLINGPOINT : "CountryCode + AirQualityStationEoICode"
+
+SAMPLINGPOINT {
+    varchar CountryCode PK
+    nvarchar AssessmentMethodId PK
+    nvarchar ProcessId PK
+    datetime2 ProcessActivityBegin PK
+    datetime2 ProcessActivityEnd
+    nvarchar SamplingPointRef
+    int AirPollutantCode
+    nvarchar AirQualityStationEoICode
+    nvarchar AirQualityStationType
+    int SuperSite
+    numeric Latitude
+    numeric Longitude
+    numeric AltitudeMasl
+    numeric InletHeightM
+    numeric BuildingDistanceM
+    numeric KerbDistanceM
+}
+
+SAMPLINGPOINT ||--|| SAMPLINGPROCESS : "CountryCode + ProcessId"
+SAMPLINGPOINT }o--o{ MEASUREMENTRESULTS : "CountryCode + AirPollutantCode + AssessmentMethodId"
+SAMPLINGPOINT }o--o{ COMPLIANCEASSESSMENTMETHOD : "CountryCode + AirPollutantCode + AssessmentMethodId + DataAggregationProcessId to ProcessId"
+
 SAMPLINGPROCESS {
     varchar CountryCode PK
     nvarchar ProcessId PK
@@ -31,71 +67,6 @@ SAMPLINGPROCESS {
     nvarchar Documentation
 }
 
-STATION {
-    varchar CountryCode PK
-    nvarchar AirQualityStationEoICode PK
-    nvarchar AirQualityNetwork
-    nvarchar AirQualityNetworkName
-    nvarchar AirQualityNetworkOrganisationalLevel
-    nvarchar Timezone
-    nvarchar AirQualityStationNatCode
-    nvarchar AQStationName
-    nvarchar AirQualityStationArea
-}
-STATION ||--o{ SAMPLINGPOINT : "one-to-many"
-
-SAMPLINGPOINT {
-    varchar CountryCode PK
-    nvarchar AssessmentMethodId PK
-    nvarchar ProcessId PK
-    datetime2 ProcessActivityBegin PK
-    datetime2 ProcessActivityEnd
-    nvarchar SamplingPointRef
-    int AirPollutantCode
-    nvarchar AirQualityStationEoICode
-    nvarchar AirQualityStationType
-    int SuperSite
-    numeric Latitude
-    numeric Longitude
-    numeric AltitudeMasl
-    numeric InletHeightM
-    numeric BuildingDistanceM
-    numeric KerbDistanceM
-}
-
-SAMPLINGPOINT {
-    varchar CountryCode PK
-    nvarchar AssessmentMethodId PK
-    nvarchar ProcessId PK
-    datetime2 ProcessActivityBegin PK
-    datetime2 ProcessActivityEnd
-    nvarchar SamplingPointRef
-    int AirPollutantCode
-    nvarchar AirQualityStationEoICode
-    nvarchar AirQualityStationType
-    int SuperSite
-    numeric Latitude
-    numeric Longitude
-    numeric AltitudeMasl
-    numeric InletHeightM
-    numeric BuildingDistanceM
-    numeric KerbDistanceM
-}
-SAMPLINGPOINT ||--|| SAMPLINGPROCESS : "one-to-one"
-SAMPLINGPOINT }o--o{ MEASUREMENTRESULTS : "many-to-many"
-SAMPLINGPOINT }o--o{ COMPLIANCEASSESSMENTMETHOD : "many-to-many"
-
-SAMPLINGPOINT_SRA {
-    varchar CountryCode PK
-    nvarchar SamplingPointRepresentativenessAreaId PK
-    float X PK
-    float Y PK
-    int SpatialResolution
-    varchar AssessmentMethodId
-}
-SAMPLINGPOINT }o--o{ COMPLIANCEASSESSMENTMETHOD : "CountryCode + AssessmentMethodId + SamplingPointRepresentativenessAreaId"
-
-
 MEASUREMENTRESULTS {
     varchar CountryCode PK
     varchar AssessmentMethodId PK
@@ -111,6 +82,16 @@ MEASUREMENTRESULTS {
     datetime ResultTime
 }
 
+SAMPLINGPOINT_SRA {
+    varchar CountryCode PK
+    nvarchar SamplingPointRepresentativenessAreaId PK
+    float X PK
+    float Y PK
+    int SpatialResolution
+    varchar AssessmentMethodId
+}
+SAMPLINGPOINT }o--o{ COMPLIANCEASSESSMENTMETHOD : "CountryCode + AssessmentMethodId + SamplingPointRepresentativenessAreaId"
+
 MODELLINGRESULTS {
     varchar CountryCode PK
     varchar AssessmentMethodId PK
@@ -124,7 +105,6 @@ MODELLINGRESULTS {
     int Validity
     datetime ResultTime
 }
-
 
 MODEL {
     varchar CountryCode PK
@@ -140,7 +120,7 @@ MODEL {
 MODEL ||--o{ COMPLIANCEASSESSMENTMETHOD : "CountryCode + AssessmentMethodId + AirPollutantCode + DataAggregationProcessId"
 MODEL ||--o{ MODELLINGRESULTS : "CountryCode + AssessmentMethodId + AirPollutantCode + DataAggregationProcessId"
 MODEL ||--o{ PLANSCENARIO : "CountryCode + AssessmentMethodId + AirPollutantCode + DataAggregationProcessId"
-MODEL ||--o{ SAMPLINGPOINT_SRA : "one-to-many"
+MODEL ||--o{ SAMPLINGPOINT_SRA : "CountryCode + AssessmentMethodId"
 
 ZONE {
     char CountryCode PK
