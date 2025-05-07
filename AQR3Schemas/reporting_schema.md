@@ -4,7 +4,7 @@ erDiagram
 AUTHORITY {
     nvarchar CountryCode PK
     nvarchar AuthorityInstanceId PK
-    int Object PK
+    int Object PK "code list needed, e.g.: ‘1: reporting assessment data to EEA’, etc."
     nvarchar PersonEmail PK
     nvarchar AuthorityInstance "Code list : ‘zone’, ‘network’, ‘nuts0’, ‘station’, ‘model’, etc."
     nvarchar OrganisationName
