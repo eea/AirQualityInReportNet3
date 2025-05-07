@@ -6,6 +6,7 @@ AUTHORITY {
     nvarchar AuthorityInstanceId PK
     int Object PK
     nvarchar PersonEmail PK
+    nvarchar AuthorityInstance
     nvarchar OrganisationName
     nvarchar OrganisationURL
     nvarchar OrganisationAddress
