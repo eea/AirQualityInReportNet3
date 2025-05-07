@@ -91,7 +91,6 @@ SAMPLINGPOINT_SRA {
     int SpatialResolution "10, 100, 1000 or 10000 m"
     varchar AssessmentMethodId
 }
-SAMPLINGPOINT_SRA }o--o{ COMPLIANCEASSESSMENTMETHOD : "CountryCode + AssessmentMethodId + SamplingPointRepresentativenessAreaId"
 
 MODEL {
     varchar CountryCode PK
