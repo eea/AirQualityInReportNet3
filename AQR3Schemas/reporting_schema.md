@@ -30,7 +30,7 @@ STATION ||--o{ SAMPLINGPOINT : "CountryCode + AirQualityStationEoICode"
 SAMPLINGPOINT {
     varchar CountryCode PK
     nvarchar AssessmentMethodId PK
-    nvarchar ProcessId PK
+    nvarchar ProcessId PK "Can be re-used for the same equipment configurations under different sampling points."
     datetime2 ProcessActivityBegin PK
     datetime2 ProcessActivityEnd
     nvarchar SamplingPointRef
