@@ -72,10 +72,10 @@ MEASUREMENTRESULTS {
     varchar CountryCode PK
     varchar AssessmentMethodId PK
     int AirPollutantCode PK
-    datetime Start PK
-    datetime End PK
+    datetime Start PK "time zone must be included"
+    datetime End PK "time zone must be included"
     decimal Value
-    varchar Unit
+    varchar Unit "Must follow recommended unit for AQD pollutants"
     varchar ObservationFrequency "Must be consistent with Start and End time"
     int Validity
     int Verification
