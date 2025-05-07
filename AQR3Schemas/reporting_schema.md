@@ -230,9 +230,8 @@ COMPLIANCEPLANLINK ||--o{ COMPLIANCEASSESSMENTMETHOD : "CountryCode + SourceAppI
 
 MEASURE {
     nvarchar CountryCode PK
+    nvarchar MeasureGroupId PK
     nvarchar MeasureId PK
-    datetime ReportingTime PK
-    nvarchar MeasureGroupId
     nvarchar MeasureCode
     nvarchar MeasureName
     nvarchar MeasureClassification
