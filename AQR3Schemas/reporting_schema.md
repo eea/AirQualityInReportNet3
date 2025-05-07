@@ -135,9 +135,9 @@ ZONE ||--o{ ASSESSMENTREGIME : "CountryCode + ZoneId"
 
 ASSESSMENTREGIME {
     varchar CountryCode PK
-    int ReportingYear PK
-    varchar DataAggregationProcessId PK
     varchar AssessmentRegimeId PK
+    varchar DataAggregationProcessId PK 
+    int ReportingYear
     varchar ZoneId
     nvarchar ZoneCode
     decimal ZoneArea
@@ -155,7 +155,7 @@ ASSESSMENTREGIME {
     int ClassificationYear
     varchar ClassificationReport
 }
-ASSESSMENTREGIME ||--o{ COMPLIANCEASSESSMENTMETHOD : "CountryCode + ReportingYear + AssessmentRegimeId + DataAggregationProcessId"
+ASSESSMENTREGIME ||--o{ COMPLIANCEASSESSMENTMETHOD : "CountryCode + AssessmentRegimeId + DataAggregationProcessId"
 
 
 COMPLIANCEASSESSMENTMETHOD {
