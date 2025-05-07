@@ -6,7 +6,7 @@ AUTHORITY {
     nvarchar AuthorityInstanceId PK
     int Object PK
     nvarchar PersonEmail PK
-    nvarchar AuthorityInstance
+    nvarchar AuthorityInstance "Authority instance code list : ‘zone’, ‘network’, ‘nuts0’, ‘station’, ‘model’, etc."
     nvarchar OrganisationName
     nvarchar OrganisationURL
     nvarchar OrganisationAddress
