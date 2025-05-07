@@ -16,7 +16,7 @@ AUTHORITY {
 
 STATION {
     varchar CountryCode PK
-    nvarchar AirQualityStationEoICode PK
+    nvarchar AirQualityStationEoICode PK "Must be always provided and cannot be modified,​"
     nvarchar AirQualityNetwork
     nvarchar AirQualityNetworkName
     nvarchar AirQualityNetworkOrganisationalLevel
