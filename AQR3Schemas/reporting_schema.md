@@ -86,8 +86,8 @@ MEASUREMENTRESULTS {
 SAMPLINGPOINT_SRA {
     varchar CountryCode PK
     nvarchar SamplingPointRepresentativenessAreaId PK
-    float X PK
-    float Y PK
+    float X PK "Project SRID3035 EEA common grid"
+    float Y PK "Project SRID3035 EEA common grid"
     int SpatialResolution "10, 100, 1000 or 10000 m"
     varchar AssessmentMethodId
 }
