@@ -11,7 +11,7 @@ AUTHORITY {
     nvarchar OrganisationURL
     nvarchar OrganisationAddress
     nvarchar PersonName
-    nvarchar AuthorityStatus
+    nvarchar AuthorityStatus "code list needed (‘active’, ‘inactive’).​"
 }
 
 STATION {
