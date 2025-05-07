@@ -160,25 +160,25 @@ ASSESSMENTREGIME ||--o{ COMPLIANCEASSESSMENTMETHOD : "CountryCode + AssessmentRe
 
 COMPLIANCEASSESSMENTMETHOD {
     varchar CountryCode PK
-    int ReportingYear PK
     varchar AssessmentRegimeId PK
+    nvarchar DataAggregationProcessId PK
     nvarchar AssessmentMethodId PK
-    varchar AttainmentId PK
+    varchar ComplianceId PK
+    int ReportingYear
     int AirPollutantCode
-    nvarchar DataAggregationProcessId
     nvarchar AssessmentType
     varchar AssessmentMethod
     int HotSpot
     varchar IsExceedance
     decimal AirPollutionLevel
     decimal AirPollutionLevelAdjusted
-    decimal AbsoluteUncertaintyLimit
-    decimal RelativeUncertaintyLimit
-    decimal MaxRatioUncertainty
+    decimal AbsoluteUncertaintyLimit "AbsoluteUncertaintyLimit must be reported for every AssessmentMethodId which refer to SamplingPoints"
+    decimal RelativeUncertaintyLimit "RelativeUncertaintyLimit must be reported for every AssessmentMethodId which refer to SamplingPoints"
+    decimal MaxRatioUncertainty "MaxRatioUncertainty must be reported for every AssessmentMethodId which refers to Model"
     char CorrectionFactor
-    varchar ComplianceId
+    varchar AttainmentcId
     nvarchar SamplingPointRepresentativenessAreaId
-    nvarchar PreliminaryReason
+    nvarchar PreliminaryReason "In case of exceedance ‘PreliminaryReason’ must not be null"
 }
 COMPLIANCEASSESSMENTMETHOD }o--o{ COMPLIANCEPLANLINK : "CountryCode + PlanId + ScenarioId"
 COMPLIANCEASSESSMENTMETHOD }o--o{ SAMPLINGPOINT_SRA : "CountryCode + AssessmentMethodId + SamplingPointRepresentativenessAreaId"
