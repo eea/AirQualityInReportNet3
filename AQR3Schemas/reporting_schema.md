@@ -209,7 +209,6 @@ PLANSCENARIO {
     float ScenarioAirPollutionLevel
     int ScenarioYear
     int AssessmentMethodId
-   
     nvarchar SupportingDocumentation
 }
 PLANSCENARIO ||--o{ COMPLIANCEPLANLINK : "CountryCode + PlanId + ScenarioId"
@@ -262,9 +261,9 @@ SCENARIOMEASURE ||--o{ MEASURE : "CountryCode + PlanId + ScenarioId"
 SOURCEAPPORTIONMENT {
     nvarchar CountryCode PK
     nvarchar SourceAppId PK
-    int AirPollutantCode PK
-    varchar ContributionType
-    varchar SpatialScale
+    int AirPollutantCode
+    varchar ContributionType "background’, increment, ..."
+    varchar SpatialScale "regional, urban, local, ..."
     varchar SourceSector
     float Contribution
 }
