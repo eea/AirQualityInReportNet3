@@ -121,7 +121,7 @@ MODELLINGRESULTS {
     int AirPollutantCode
     datetime End
     decimal Value
-    varchar Unit
+    varchar Unit "Use the unit for AQD pollutants"
     int Validity
     int SpatialResolution "10, 100, 1000 or 10000 m"
     datetime ResultTime
