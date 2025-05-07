@@ -217,8 +217,9 @@ COMPLIANCEPLANLINK {
     varchar CountryCode PK
     varchar ComplianceId PK
     nvarchar PlanId PK
-    nvarchar SourceAppId PK
     nvarchar ScenarioId PK
+    nvarchar SourceAppId PK
+    
 }
 COMPLIANCEPLANLINK ||--o{ PLANSCENARIO : "CountryCode + PlanId + ScenarioId"
 COMPLIANCEPLANLINK ||--o{ COMPLIANCEASSESSMENTMETHOD : "CountryCode + PlanId + ScenarioId"
