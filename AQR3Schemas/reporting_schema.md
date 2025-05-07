@@ -76,7 +76,7 @@ MEASUREMENTRESULTS {
     datetime End PK
     decimal Value
     varchar Unit
-    varchar ObservationFrequency
+    varchar ObservationFrequency "Must be consistent with Start and End time"
     int Validity
     int Verification
     decimal DataCapture
