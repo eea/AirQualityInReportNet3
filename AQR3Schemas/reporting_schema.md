@@ -197,16 +197,19 @@ ADJUSTMENT }o--o{ MODEL : "CountryCode + ComplianceId + DeductionAssessmentMetho
 
 PLANSCENARIO {
     nvarchar CountryCode PK
-    nvarchar ScenarioId PK
     nvarchar PlanId PK
-    varchar DataAggregationProcessId
+    nvarchar ScenarioId PK
+    varchar PlanCategory
     varchar ScenarioCategory
-    int ScenarioYear
-    float ScenarioAirPollutionLevel
-    int AssessmentMethodId
     nvarchar AuthorityOrganisation
     nvarchar AuthorityWebsite
     varchar AuthorityLevel
+    varchar ScenarioCode
+    varchar DataAggregationProcessId
+    float ScenarioAirPollutionLevel
+    int ScenarioYear
+    int AssessmentMethodId
+   
     nvarchar SupportingDocumentation
 }
 PLANSCENARIO ||--o{ COMPLIANCEPLANLINK : "CountryCode + PlanId + ScenarioId"
@@ -219,7 +222,6 @@ COMPLIANCEPLANLINK {
     nvarchar PlanId PK
     nvarchar ScenarioId PK
     nvarchar SourceAppId PK
-    
 }
 COMPLIANCEPLANLINK ||--o{ PLANSCENARIO : "CountryCode + PlanId + ScenarioId"
 COMPLIANCEPLANLINK ||--o{ COMPLIANCEASSESSMENTMETHOD : "CountryCode + PlanId + ScenarioId"
