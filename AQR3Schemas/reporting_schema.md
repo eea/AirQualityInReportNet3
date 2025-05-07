@@ -110,13 +110,15 @@ MODELLINGRESULTS {
 MODEL {
     varchar CountryCode PK
     nvarchar AssessmentMethodId PK
-    int AirPollutantCode PK
     varchar DataAggregationProcessId PK
+    varchar AssessmentMethodName "e.g.: WRF-Chem, CHIMERE, etc."
+    varchar AssessmentType
+    int AirPollutantCode
     nvarchar ResultEncoding
     nvarchar ModelApplication
+    decimal MQI
     nvarchar ModelReport
     nvarchar DataQualityReport
-    decimal MQI
 }
 MODEL ||--o{ COMPLIANCEASSESSMENTMETHOD : "CountryCode + AssessmentMethodId + AirPollutantCode + DataAggregationProcessId"
 MODEL ||--o{ MODELLINGRESULTS : "CountryCode + AssessmentMethodId + AirPollutantCode + DataAggregationProcessId"
