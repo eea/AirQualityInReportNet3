@@ -93,20 +93,6 @@ SAMPLINGPOINT_SRA {
 }
 SAMPLINGPOINT }o--o{ COMPLIANCEASSESSMENTMETHOD : "CountryCode + AssessmentMethodId + SamplingPointRepresentativenessAreaId"
 
-MODELLINGRESULTS {
-    varchar CountryCode PK
-    varchar AssessmentMethodId PK
-    int AirPollutantCode PK
-    datetime Start PK
-    varchar DataAggregationProcessId PK
-    float X PK
-    float Y PK
-    decimal Value
-    varchar Unit
-    int Validity
-    datetime ResultTime
-}
-
 MODEL {
     varchar CountryCode PK
     nvarchar AssessmentMethodId PK
@@ -124,6 +110,22 @@ MODEL ||--o{ COMPLIANCEASSESSMENTMETHOD : "CountryCode + AssessmentMethodId + Da
 MODEL ||--o{ MODELLINGRESULTS : "CountryCode + AssessmentMethodId + DataAggregationProcessId"
 MODEL ||--o{ PLANSCENARIO : "CountryCode + AssessmentMethodId + DataAggregationProcessId"
 MODEL ||--o{ SAMPLINGPOINT_SRA : "CountryCode + AssessmentMethodId"
+
+MODELLINGRESULTS {
+    varchar CountryCode PK
+    varchar AssessmentMethodId PK
+    datetime Start PK
+    varchar DataAggregationProcessId PK
+    float X PK "Projection SRID3035-EEA common grid"
+    float Y PK "Projection SRID3035-EEA common grid"
+    int AirPollutantCode
+    datetime End
+    decimal Value
+    varchar Unit
+    int Validity
+    int SpatialResolution "10, 100, 1000 or 10000 m"
+    datetime ResultTime
+}
 
 ZONE {
     char CountryCode PK
