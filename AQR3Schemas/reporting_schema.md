@@ -129,7 +129,7 @@ MODELLINGRESULTS {
 ZONE {
     char CountryCode PK
     char ZoneId PK
-    nvarchar ZoneGeometry
+    nvarchar ZoneGeometry "Projection: SRID4326 or SRID4258"
 }
 ZONE ||--o{ ASSESSMENTREGIME : "CountryCode + ZoneId"
 
