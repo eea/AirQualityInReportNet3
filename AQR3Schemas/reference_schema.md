@@ -3,16 +3,16 @@ erDiagram
 
 AUTHORITY {
     nvarchar Country
-    nvarchar CountryCode
-    nvarchar AuthorityInstance
-    nvarchar AuthorityInstanceId
-    int Object
+    nvarchar CountryCode "not null"
+    nvarchar AuthorityInstance "not null"
+    nvarchar AuthorityInstanceId "not null"
+    int Object "not null"
     nvarchar OrganisationName
     nvarchar OrganisationURL
     nvarchar OrganisationAddress
-    nvarchar PersonName
-    nvarchar PersonEmail
-    datetime ReportingTime
+    nvarchar PersonName "not null"
+    nvarchar PersonEmail "not null"
+    datetime ReportingTime "not null"
 }
 
 STATION {
