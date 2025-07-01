@@ -10,8 +10,7 @@ AUTHORITY {
     nvarchar OrganisationName
     nvarchar OrganisationURL
     nvarchar OrganisationAddress
-    nvarchar PersonName
-    nvarchar AuthorityStatus "code list needed (‘active’, ‘inactive’).​"
+    nvarchar PersonName   
 }
 
 STATION {
@@ -40,10 +39,10 @@ SAMPLINGPOINT {
     int SuperSite
     numeric Latitude
     numeric Longitude
-    numeric AltitudeMasl
-    numeric InletHeightM
-    numeric BuildingDistanceM
-    numeric KerbDistanceM
+    numeric Altitude(Masl)
+    numeric InletHeight(M)
+    numeric BuildingDistance(M)
+    numeric KerbDistance(M)
 }
 
 SAMPLINGPOINT ||--|| SAMPLINGPROCESS : "CountryCode + ProcessId"
@@ -52,20 +51,21 @@ SAMPLINGPOINT }o--o{ COMPLIANCEASSESSMENTMETHOD : "CountryCode + AirPollutantCod
 
 SAMPLINGPROCESS {
     varchar CountryCode PK
+    nvarchar AssessmentMethodId
     nvarchar ProcessId PK
     int AirPollutantCode
+    datetime2 ProcessActivityBegin
+	datetime2 ProcessActivityEnd
     nvarchar MeasurementType
     nvarchar MeasurementMethod
     nvarchar MeasurementEquipment
     nvarchar SamplingMethod
     int SamplingEquipment
     nvarchar AnalyticalTechnique
-    nvarchar EquivalenceDemonstrated
-    nvarchar DetectionLimit
-    nvarchar DetectionLimitUnit
-    nvarchar QAReport
-    nvarchar EquivalenceDemonstrationReport
-    nvarchar Documentation
+    nvarchar EquivalenceDemonstrated    
+    nvarchar DataQualityReportId
+    nvarchar EquivalenceDemonstrationReportId
+    nvarchar ProcessDocumentationId
 }
 
 MEASUREMENTRESULTS {
@@ -88,15 +88,15 @@ SAMPLINGPOINT_SRA {
     nvarchar SamplingPointRepresentativenessAreaId PK
     float X PK "Project SRID3035 EEA common grid"
     float Y PK "Project SRID3035 EEA common grid"
-    int SpatialResolution "10, 100, 1000 or 10000 m"
+    int SpatialResolution "not null, 10, 100, 1000 or 10000 m"
     varchar AssessmentMethodId
 }
 
 MODEL {
     varchar CountryCode PK
-    nvarchar AssessmentMethodId PK
-    varchar DataAggregationProcessId PK
-    varchar AssessmentMethodName "e.g.: WRF-Chem, CHIMERE, etc."
+    nvarchar AssessmentMethodId PK "not null"
+    varchar DataAggregationProcessId PK 
+    varchar AssessmentMethodName "not null,e.g.: WRF-Chem, CHIMERE, etc."
     varchar AssessmentType
     int AirPollutantCode
     nvarchar ResultEncoding
@@ -112,7 +112,7 @@ MODEL ||--o{ SAMPLINGPOINT_SRA : "CountryCode + AssessmentMethodId"
 
 MODELLINGRESULTS {
     varchar CountryCode PK
-    varchar AssessmentMethodId PK
+    varchar AssessmentMethodId PK    
     datetime Start PK
     varchar DataAggregationProcessId PK
     float X PK "Projection SRID3035-EEA common grid"
@@ -136,12 +136,12 @@ ZONE ||--o{ ASSESSMENTREGIME : "CountryCode + ZoneId"
 ASSESSMENTREGIME {
     varchar CountryCode PK
     varchar AssessmentRegimeId PK
-    varchar DataAggregationProcessId PK 
+    varchar DataAggregationProcessId PK "not null"
     int ReportingYear
     varchar ZoneId
     nvarchar ZoneCode
     decimal ZoneArea
-    varchar ZoneCategory
+    varchar ZoneCategory "not null"
     nvarchar ZoneType
     varchar ZoneName
     int AirPollutantCode
@@ -160,16 +160,16 @@ ASSESSMENTREGIME ||--o{ COMPLIANCEASSESSMENTMETHOD : "CountryCode + AssessmentRe
 
 COMPLIANCEASSESSMENTMETHOD {
     varchar CountryCode PK
-    varchar AssessmentRegimeId PK
+    varchar AssessmentRegimeId PK "not null"
     nvarchar DataAggregationProcessId PK
     nvarchar AssessmentMethodId PK
     varchar ComplianceId PK
     int ReportingYear
     int AirPollutantCode
     nvarchar AssessmentType
-    varchar AssessmentMethod
+    varchar AssessmentMethod "not null"
     int HotSpot
-    varchar IsExceedance
+    varchar IsExceedance "not null"
     decimal AirPollutionLevel
     decimal AirPollutionLevelAdjusted
     decimal AbsoluteUncertaintyLimit "AbsoluteUncertaintyLimit must be reported for every AssessmentMethodId which refer to SamplingPoints"
@@ -186,21 +186,20 @@ COMPLIANCEASSESSMENTMETHOD }o--o{ SAMPLINGPOINT_SRA : "CountryCode + AssessmentM
 
 ADJUSTMENT {
     nvarchar CountryCode PK
-    varchar ComplianceId PK
-    nvarchar DeductionAssessmentMethod PK
-    nvarchar AdjustmentType
+    varchar AttainmentId PK "not null"
+    nvarchar Adj_AssessmentMethodId PK
     nvarchar AdjustmentSource
     decimal MaxRatioUncertainty
 }
-ADJUSTMENT }o--o{ COMPLIANCEASSESSMENTMETHOD : "CountryCode + ComplianceId + DeductionAssessmentMethod"
-ADJUSTMENT }o--o{ MODEL : "CountryCode + ComplianceId + DeductionAssessmentMethod"
+ADJUSTMENT }o--o{ COMPLIANCEASSESSMENTMETHOD : "CountryCode + AttainmentId + Adj_AssessmentMethodId"
+ADJUSTMENT }o--o{ MODEL : "CountryCode + AttainmentId + Adj_AssessmentMethodId"
 
 PLANSCENARIO {
     nvarchar CountryCode PK
     nvarchar PlanId PK
-    nvarchar ScenarioId PK
+    nvarchar ScenarioId PK "not null"
     varchar PlanCategory
-    varchar ScenarioCategory
+    varchar ScenarioCategory "not null"
     nvarchar AuthorityOrganisation
     nvarchar AuthorityWebsite
     varchar AuthorityLevel
@@ -217,7 +216,7 @@ PLANSCENARIO ||--o{ SCENARIOMEASURE : "CountryCode + PlanId + ScenarioId"
 
 COMPLIANCEPLANLINK {
     varchar CountryCode PK
-    varchar ComplianceId PK
+    varchar ComplianceId PK "not null"
     nvarchar PlanId PK
     nvarchar ScenarioId PK
     nvarchar SourceAppId PK
@@ -230,8 +229,8 @@ COMPLIANCEPLANLINK ||--o{ COMPLIANCEASSESSMENTMETHOD : "CountryCode + SourceAppI
 
 MEASURE {
     nvarchar CountryCode PK
-    nvarchar MeasureGroupId PK
-    nvarchar MeasureId PK
+    nvarchar MeasureGroupId PK "not null"
+    nvarchar MeasureId PK "not null"
     nvarchar MeasureCode
     nvarchar MeasureName
     nvarchar MeasureClassification
@@ -249,7 +248,7 @@ MEASURE {
 SCENARIOMEASURE {
     nvarchar CountryCode PK
     nvarchar ScenarioId PK
-    nvarchar MeasureGroupId PK
+    nvarchar MeasureGroupId PK "not null"
     float MeasureGroupAirPollutionReduction
     int AssessmentMethodId
 }
@@ -259,7 +258,7 @@ SCENARIOMEASURE ||--o{ MEASURE : "CountryCode + PlanId + ScenarioId"
 
 SOURCEAPPORTIONMENT {
     nvarchar CountryCode PK
-    nvarchar SourceAppId PK
+    nvarchar SourceAppId PK "not null"
     int AirPollutantCode
     varchar ContributionType "background’, increment, ..."
     varchar SpatialScale "regional, urban, local, ..."
