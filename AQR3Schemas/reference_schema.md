@@ -28,7 +28,7 @@ STATION {
     nvarchar AirQualityStationNatCode
     nvarchar AQStationName
     nvarchar AirQualityStationArea
-    datetime ReportingTime
+    datetime ReportingTime "not null"
 }
 STATION ||--o{ SAMPLINGPOINT : "CountryCode + AirQualityStationEoICode"
 
@@ -44,17 +44,21 @@ SAMPLINGPOINT {
     int SuperSite
     numeric Latitude
     numeric Longitude
+    numeric Altitude(masl)
+	numeric InletHeight(m) 
+	numeric BuildingDistance(m)
+	numeric KerbDistance(m)
     nvarchar ProcessId
     datetime2 ProcessActivityBegin
     datetime2 ProcessActivityEnd
-    varchar SamplingPointStatus
+    varchar SamplingPointStatus "not null"
     float X
     float Y
     bigint GridNum10m
     bigint GridNum100m
     bigint GridNum1km
     bigint GridNum10km
-    datetime ReportingTime
+    datetime ReportingTime "not null"
 }
 SAMPLINGPOINT ||--|| SAMPLINGPROCESS : "CountryCode + ProcessId"
 SAMPLINGPOINT }o--o{ MEASUREMENTRESULTS : "CountryCode + AirPollutantCode + AssessmentMethodId"
@@ -66,6 +70,8 @@ SAMPLINGPROCESS {
     nvarchar AirPollutant
     int AirPollutantCode
     nvarchar ProcessId
+    datetime2 ProcessActivityBegin
+	datetim2 ProcessActivityEnd
     nvarchar MeasurementType
     nvarchar MeasurementMethod
     nvarchar MeasurementEquipment
@@ -73,11 +79,10 @@ SAMPLINGPROCESS {
     int SamplingEquipment
     nvarchar AnalyticalTechnique
     nvarchar EquivalenceDemonstrated
-    nvarchar DetectionLimit
-    nvarchar DetectionLimitUnit
-    nvarchar QAReportURL
+    nvarchar DataQualityReportURL
     nvarchar EquivalenceDemonstrationReportURL
-    nvarchar DocumentationURL
+    nvarchar ProcessDocumentationURL
+    int Deletion "Not Null"
 }
 
 MEASUREMENTRESULTS {
@@ -105,7 +110,7 @@ SAMPLINGPOINT_SRA {
     nvarchar SamplingPointRepresentativenessAreaId
     float X
     float Y
-    int SpatialResolution
+    int SpatialResolution "not null"
     bigint GridNum10m
     bigint GridNum100m
     bigint GridNum10km
@@ -124,14 +129,14 @@ MODELLINGRESULTS {
     decimal Value
     varchar Unit
     int Validity
-    int Verification
+    int Verification "not null"
     datetime ResultTime
     varchar DataAggregationProcessId
     varchar DataAggregationProcess
-    varchar SourceDataFlow
+    varchar SourceDataFlow "not null"
     float X
     float Y
-    int SpatialResolution
+    int SpatialResolution "not null"
     int GridNum10m
     int GridNum100m
     bigint GridNum1km
@@ -141,8 +146,8 @@ MODELLINGRESULTS {
 MODEL {
     varchar Country
     varchar CountryCode
-    nvarchar AssessmentMethodId
-    varchar AssessmentMethodName
+    nvarchar AssessmentMethodId "not null"
+    varchar AssessmentMethodName "not null"
     nvarchar AssessmentType
     nvarchar AirPollutant
     int AirPollutantCode
@@ -177,7 +182,7 @@ GRIDZONE {
     bigint GridNum10km
 }
 
-ASSESSMENTREGIME {
+ASSESSMENTREGIMEZONE {
     nvarchar Country
     varchar CountryCode
     int ReportingYear
@@ -201,21 +206,26 @@ ASSESSMENTREGIME {
     int ZoneResidentPopulationYear
     int ZoneResidentPopulation
     int ClassificationYear
-    varchar ClassificationReportURL
-    int RequiredNrOfSamplingPoints
-    int NrOfFixedSPOs
-    int NrOfFixedRandomSPOs
-    int NrOfIndicativeSPOs
-    int NrOfSPOsForObjectiveEstimation
-    int NrOfModels
+    varchar ClassificationReportURL    
+    int RequiredNumberOfFixedSPO
+	int ReportedNumberOfFixedSPO
+	int RequiredNumberOfFixedRandomSPO
+	int ReportedNumberOfFixedRandomSPO
+	int RequiredNumberOfIndicativeSPO
+	int ReportedNumberOfIndicativeSPO
+	int RequiredNumberOfOBESPO
+	int ReportedNumberOfOBESPO
+	int RequiredNumberOfModels
+	int ReportedNumberOfModels
+	int Deletion "not null"
 }
-ASSESSMENTREGIME ||--o{ COMPLIANCEASSESSMENTMETHOD : "CountryCode + ReportingYear + AssessmentRegimeId + DataAggregationProcessId"
+ASSESSMENTREGIMEZONE ||--o{ COMPLIANCEASSESSMENTMETHOD : "CountryCode + ReportingYear + AssessmentRegimeId + DataAggregationProcessId"
 
 COMPLIANCEASSESSMENTMETHOD {
     nvarchar Country
     varchar CountryCode
     int ReportingYear
-    varchar AssessmentRegimeId
+    varchar AssessmentRegimeId "not null"
     nvarchar AirPollutant
     int AirPollutantCode
     nvarchar DataAggregationProcessId
@@ -223,7 +233,7 @@ COMPLIANCEASSESSMENTMETHOD {
     varchar AssessmentMethod
     int HotSpot
     nvarchar AssessmentMethodId
-    varchar IsExceedance
+    varchar IsExceedance "not null"
     decimal AirPollutionLevel
     decimal AirPollutionLevelAdjusted
     decimal AbsoluteUncertaintyLimit
@@ -245,25 +255,25 @@ COMPLIANCEASSESSMENTMETHOD }o--o{ SAMPLINGPOINT_SRA : "CountryCode + AssessmentM
 ADJUSTMENT {
     nvarchar Country
     varchar CountryCode
-    varchar ComplianceId
-    nvarchar DeductionAssessmentMethod
-    nvarchar AdjustmentType
+    varchar AttainmentId
+    nvarchar Adj_AssessmentMethodId
     nvarchar AdjustmentSource
     decimal MaxRatioUncertainty
+    int Deletion "not null"
 }
-ADJUSTMENT }o--o{ COMPLIANCEASSESSMENTMETHOD : "CountryCode + ComplianceId + DeductionAssessmentMethod"
-ADJUSTMENT }o--o{ MODEL : "CountryCode + ComplianceId + DeductionAssessmentMethod"
+ADJUSTMENT }o--o{ COMPLIANCEASSESSMENTMETHOD : "CountryCode + AttainmentId + AssessmentMethod"
+ADJUSTMENT }o--o{ MODEL : "CountryCode + AssessmentMethodId + AssessmentMethodName"
 
 PLANSCENARIO {
     nvarchar Country
     nvarchar CountryCode
-    nvarchar ScenarioId
+    nvarchar ScenarioId "not null"
     nvarchar ScenarioCode
     nvarchar AirPollutant
     nvarchar AirPollutantCode
     varchar DataAggregationProcess
     varchar DataAggregationProcessId
-    varchar ScenarioCategory
+    varchar ScenarioCategory "not null"
     int ScenarioYear
     float ScenarioAirPollutionLevel
     int AssessmentMethodId
@@ -282,7 +292,7 @@ COMPLIANCEPLANLINK {
     nvarchar Country
     varchar CountryCode
     int ReportingYear
-    varchar ComplianceId
+    varchar ComplianceId "not null"
     nvarchar PlanId
     nvarchar SourceAppId
     nvarchar ScenarioId
@@ -291,9 +301,9 @@ COMPLIANCEPLANLINK {
 MEASURE {
     nvarchar Country
     nvarchar CountryCode
-    nvarchar MeasureGroupId
-    nvarchar MeasureId
-    nvarchar MeasureCode
+    nvarchar MeasureGroupId "not null"
+    nvarchar MeasureId "not null"
+    nvarchar MeasureCode "not null"
     nvarchar MeasureName
     nvarchar MeasureClassification
     nvarchar MeasureType
@@ -304,7 +314,7 @@ MEASURE {
     bigint Cost
     date FullEffectDate
     varchar MeasureStatus
-    int ReasonIfMeasureNotUsed
+    int ReasonIfMeasureNotUsed "not null"
     datetime ReportingTime
 }
 
@@ -316,7 +326,7 @@ SCENARIOMEASURE {
     nvarchar AirPollutantCode
     varchar DataAggregationProcess
     varchar DataAggregationProcessId
-    nvarchar MeasureGroupId
+    nvarchar MeasureGroupId "not null"
     float MeasureGroupAirPollutionReduction
     int AssessmentMethodId
 }
@@ -326,7 +336,7 @@ SCENARIOMEASURE ||--o{ MEASURE : "CountryCode + PlanId + ScenarioId"
 SOURCEAPPORTIONMENT {
     nvarchar Country
     nvarchar CountryCode
-    nvarchar SourceAppId
+    nvarchar SourceAppId "not null"
     nvarchar AirPollutant
     int AirPollutantCode
     varchar ContributionType
@@ -337,7 +347,7 @@ SOURCEAPPORTIONMENT {
 SOURCEAPPORTIONMENT ||--o{ COMPLIANCEPLANLINK : "CountryCode + SourceAppId to AttainmentId"
 
 ADMINBOUNDARYGRID {
-    smallint adm_id
+    smallint adm_id "not null"
     bigint GridNum100m
     bigint GridNum10km
     bigint GridNum1km
@@ -347,46 +357,46 @@ ADMINBOUNDARYGRID {
 ADMINBOUNDARYGRID ||--|| ADMINBOUNDARYLOOKUP_ADM_EEA39_2021 : "adm_id"
 
 ADMINBOUNDARYLOOKUP_ADM_EEA39_2021 {
-    smallint adm_id
-    nvarchar ICC
-    nvarchar adm_country
-    nvarchar level3_name
-    nvarchar level2_name
-    nvarchar level1_name
-    nvarchar level0_name
-    nvarchar level3_code
-    nvarchar level2_code
-    nvarchar level1_code
-    nvarchar level0_code
-    bit EEA32_2020
-    bit EEA38_2020
-    bit EEA39
-    bit EEA33
-    bit eea32
-    bit eu27_nouk
-    bit EU28
-    bit eu27
-    bit EU25
-    bit EU15
-    bit EU12
-    bit EU10
-    tinyint EFTA4
-    nvarchar NUTS_EU
-    nvarchar TAA
+    smallint adm_id "not null"
+    nvarchar ICC "not null"
+    nvarchar adm_country "not null" 
+    nvarchar level3_name "not null"
+    nvarchar level2_name "not null"
+    nvarchar level1_name "not null"
+    nvarchar level0_name "not null"
+    nvarchar level3_code "not null"
+    nvarchar level2_code "not null"
+    nvarchar level1_code "not null"
+    nvarchar level0_code "not null"
+    bit EEA32_2020 "not null"
+    bit EEA38_2020 "not null"
+    bit EEA39 "not null"
+    bit EEA33 "not null"
+    bit eea32 "not null"
+    bit eu27_nouk "not null"
+    bit EU28 "not null"
+    bit eu27 "not null"
+    bit EU25 "not null"
+    bit EU15 "not null"
+    bit EU12 "not null"
+    bit EU10 "not null"
+    tinyint EFTA4 "not null"
+    nvarchar NUTS_EU "not null"
+    nvarchar TAA "not null"
 }
 
 VOCABULARYRELATIONS {
-    varchar Vocabulary
-    varchar RelatedVocabulary
-    varchar Concept_notation
-    varchar Related_notation
+    varchar Vocabulary "not null"
+    varchar RelatedVocabulary "not null"
+    varchar Concept_notation "not null"
+    varchar Related_notation "not null"
 }
 VOCABULARYRELATIONS ||--o{ VOCABULARY : "vocabulary + Notation as Concept_notation"
 
 VOCABULARY {
-    varchar vocabulary
-    varchar Notation
-    varchar URI
+    varchar vocabulary "not null"
+    varchar Notation "not null"
+    varchar URI "not null"
     varchar Label
     varchar Definition
     varchar Note
