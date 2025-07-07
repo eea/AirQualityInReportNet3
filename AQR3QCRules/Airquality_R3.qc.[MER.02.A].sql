@@ -1,7 +1,7 @@
 USE [Airquality_R3]
 GO
 
-/****** Object:  View [qc].[MER.02.A]    Script Date: 27/06/2025 ******/
+/****** Object:  View [qc].[MER.02.A]    Script Date: 07/07/2025 ******/
 SET ANSI_NULLS ON
 GO
 
@@ -14,12 +14,14 @@ GO
 CREATE VIEW [qc].[MER.02.A] AS
 
 -- Creation date: June 2025
+-- QC rule code: MER.02.A
+-- QC rule name: MER.02.A Cross-check - [AssessmentMethodId] SPO.02
 
 WITH 
 CTE_measureresults AS (
     SELECT 
            CASE WHEN assessmentmethodid = '' THEN NULL ELSE assessmentmethodid END AS assessmentmethodid
-    FROM reporting.MeasurementResults
+    FROM reporting.MeasurementResult
 ),
 
 CTE_samplingpoint_check AS (
