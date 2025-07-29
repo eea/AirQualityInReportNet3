@@ -68,7 +68,7 @@ SAMPLINGPROCESS {
     nvarchar ProcessDocumentationId
 }
 
-MEASUREMENTRESULTS {
+MEASUREMENTRESULT {
     varchar CountryCode PK
     varchar AssessmentMethodId PK
     int AirPollutantCode PK
@@ -76,20 +76,47 @@ MEASUREMENTRESULTS {
     datetime End PK "time zone must be included"
     decimal Value
     varchar Unit "Must follow recommended unit for AQD pollutants"
-    varchar ObservationFrequency "Must be consistent with Start and End time"
+    varchar TimeResolution 
     int Validity
     int Verification
     decimal DataCapture
     datetime ResultTime
 }
 
-SAMPLINGPOINT_SRA {
+MEASUREMENTRESULTPNSD {
     varchar CountryCode PK
-    nvarchar SamplingPointRepresentativenessAreaId PK
-    float X PK "Project SRID3035 EEA common grid"
-    float Y PK "Project SRID3035 EEA common grid"
-    int SpatialResolution "not null, 10, 100, 1000 or 10000 m"
-    varchar AssessmentMethodId
+    varchar AssessmentMethodId PK
+    int AirPollutantCode PK
+    datetime Start PK "time zone must be included"
+    datetime End PK "time zone must be included"
+    decimal Value
+    varchar Unit "Must follow recommended unit for AQD pollutants"
+    varchar TimeResolution 
+    int Validity
+    int Verification
+    int LowerRange
+    int UpperRange
+    decimal Temperature
+    decimal RelativeHumidity
+    decimal Pressure  
+    datetime ResultTime
+    varchar Inversion
+}
+
+SRAREA_INLINE {
+    varchar CountryCode PK
+    nvarchar SR_ApplicationId PK
+    bigint X PK "Project SRID3035 EEA common grid"
+    bigint Y PK "Project SRID3035 EEA common grid"
+    int SpatialResolution "not null, 10, 100, 1000 or 10000 m"    
+}
+
+SRAREA_EXTERNAL {
+    varchar CountryCode PK
+    nvarchar SR_ApplicationId PK
+    bigint X PK "Project SRID3035 EEA common grid"
+    bigint Y PK "Project SRID3035 EEA common grid"
+    int SpatialResolution "not null, 10, 100, 1000 or 10000 m"    
 }
 
 MODEL {
@@ -110,13 +137,27 @@ MODEL ||--o{ MODELLINGRESULTS : "CountryCode + AssessmentMethodId + DataAggregat
 MODEL ||--o{ PLANSCENARIO : "CountryCode + AssessmentMethodId + DataAggregationProcessId"
 MODEL ||--o{ SAMPLINGPOINT_SRA : "CountryCode + AssessmentMethodId"
 
-MODELLINGRESULTS {
+MODELLINGRESULTEXTERNAL {
     varchar CountryCode PK
     varchar AssessmentMethodId PK    
     datetime Start PK
     varchar DataAggregationProcessId PK
-    float X PK "Projection SRID3035-EEA common grid"
-    float Y PK "Projection SRID3035-EEA common grid"
+    int AirPollutantCode
+    datetime End    
+    varchar Unit "Use the unit for AQD pollutants"
+    int Validity
+    int SpatialResolution "10, 100, 1000 or 10000 m"
+    datetime ResultTime
+    varchar GeoTiffAttachment
+}
+
+MODELLINGRESULTINLINE {
+    varchar CountryCode PK
+    varchar AssessmentMethodId PK    
+    datetime Start PK
+    varchar DataAggregationProcessId PK
+    bigint X PK "Projection SRID3035-EEA common grid"
+    bigint Y PK "Projection SRID3035-EEA common grid"
     int AirPollutantCode
     datetime End
     decimal Value
@@ -126,7 +167,7 @@ MODELLINGRESULTS {
     datetime ResultTime
 }
 
-ZONE {
+ZONEGEOMETRY {
     char CountryCode PK
     char ZoneId PK
     nvarchar ZoneGeometry "Projection: SRID4326 or SRID4258"
