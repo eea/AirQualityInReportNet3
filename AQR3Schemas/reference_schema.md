@@ -39,26 +39,28 @@ SAMPLINGPOINT {
     nvarchar AssessmentMethodId
     nvarchar SamplingPointRef
     nvarchar AirPollutant
-    int AirPollutantCode
-    nvarchar AirQualityStationType
+    int AirPollutantCode    
+    varchar AirQualityStationArea
+    varchar AirQualitySPOType
     int SuperSite
     numeric Latitude
     numeric Longitude
     numeric Altitude(masl)
-	numeric InletHeight(m) 
-	numeric BuildingDistance(m)
-	numeric KerbDistance(m)
+    numeric InletHeight(m) 
+    numeric BuildingDistance(m)
+    numeric KerbDistance(m)
     nvarchar ProcessId
     datetime2 ProcessActivityBegin
     datetime2 ProcessActivityEnd
     varchar SamplingPointStatus "not null"
-    float X
-    float Y
+    bigint X
+    bigint Y
     bigint GridNum10m
     bigint GridNum100m
     bigint GridNum1km
     bigint GridNum10km
     datetime ReportingTime "not null"
+    bit Deletion
 }
 SAMPLINGPOINT ||--|| SAMPLINGPROCESS : "CountryCode + ProcessId"
 SAMPLINGPOINT }o--o{ MEASUREMENTRESULTS : "CountryCode + AirPollutantCode + AssessmentMethodId"
@@ -85,37 +87,40 @@ SAMPLINGPROCESS {
     int Deletion "Not Null"
 }
 
-MEASUREMENTRESULTS {
+MEASUREMENTRESULT {
+    varchar Country
     varchar CountryCode
-    nvarchar SamplingPointRef
+    varchar AssessmentMethodId
     nvarchar AirPollutant
     int AirPollutantCode
     date Start
     date End
     numeric Value
     nvarchar Unit
-    nvarchar ObservationFrequency
+    varchar TimeResolution
     int Validity
     int Verification
-    numeric DataCapture
+    decimal DataCapture
     datetime2 ResultTime
-    numeric DataCoverage
+    decimal DataCoverage
     nvarchar DataAggregationProcessId
     nvarchar DataAggregationProcess
     varchar SourceDataFlow
+    int Deletion
 }
 
-SAMPLINGPOINT_SRA {
+SRArea {
+    varchar Country	
     varchar CountryCode
-    nvarchar SamplingPointRepresentativenessAreaId
-    float X
-    float Y
+    varchar SR_ApplicationId
+    biging X
+    bigint Y
     int SpatialResolution "not null"
     bigint GridNum10m
     bigint GridNum100m
     bigint GridNum10km
     bigint GridNum1km
-    varchar AssessmentMethodId
+    bit Deletion
 }
 SAMPLINGPOINT }o--o{ COMPLIANCEASSESSMENTMETHOD : "CountryCode + AssessmentMethodId + SamplingPointRepresentativenessAreaId"
 
@@ -134,13 +139,14 @@ MODELLINGRESULTS {
     varchar DataAggregationProcessId
     varchar DataAggregationProcess
     varchar SourceDataFlow "not null"
-    float X
-    float Y
+    bigint X
+    bigint Y
     int SpatialResolution "not null"
     int GridNum10m
     int GridNum100m
     bigint GridNum1km
     bigint GridNum10km
+    bit Deletion
 }
 
 MODEL {
@@ -158,19 +164,12 @@ MODEL {
     nvarchar ModelReportURL
     nvarchar DataQualityReportURL
     decimal MQI
+    bit Deletion 
 }
 MODEL ||--o{ COMPLIANCEASSESSMENTMETHOD : "CountryCode + AssessmentMethodId + AirPollutantCode + DataAggregationProcessId"
 MODEL ||--o{ MODELLINGRESULTS : "CountryCode + AssessmentMethodId + AirPollutantCode + DataAggregationProcessId"
 MODEL ||--o{ PLANSCENARIO : "CountryCode + AssessmentMethodId + AirPollutantCode + DataAggregationProcessId"
 MODEL ||--o{ SAMPLINGPOINT_SRA : "CountryCode + AssessmentMethodId"
-
-ZONE {
-    char CountryCode PK
-    char ZoneId PK
-    nvarchar ZoneGeometry
-}
-ZONE ||--o{ ASSESSMENTREGIME : "CountryCode + ZoneId"
-ZONE ||--o{ GRIDZONE : "CountryCode + ZoneId"
 
 GRIDZONE {
     char CountryCode
@@ -259,7 +258,7 @@ ADJUSTMENT {
     nvarchar Adj_AssessmentMethodId
     nvarchar AdjustmentSource
     decimal MaxRatioUncertainty
-    int Deletion "not null"
+    bit Deletion "not null"
 }
 ADJUSTMENT }o--o{ COMPLIANCEASSESSMENTMETHOD : "CountryCode + AttainmentId + AssessmentMethod"
 ADJUSTMENT }o--o{ MODEL : "CountryCode + AssessmentMethodId + AssessmentMethodName"
