@@ -65,7 +65,7 @@ SAMPLINGPOINT {
     bit Deletion
 }
 SAMPLINGPOINT ||--|| SAMPLINGPROCESS : "CountryCode + ProcessId"
-SAMPLINGPOINT }o--o{ MEASUREMENTRESULTS : "CountryCode + AirPollutantCode + AssessmentMethodId"
+SAMPLINGPOINT }o--o{ MEASUREMENTRESULT : "CountryCode + AirPollutantCode + AssessmentMethodId"
 SAMPLINGPOINT }o--o{ COMPLIANCEASSESSMENTMETHOD : "CountryCode + AirPollutantCode + AssessmentMethodId + DataAggregationProcessId to ProcessId"
 
 SAMPLINGPROCESS {
@@ -75,7 +75,7 @@ SAMPLINGPROCESS {
     int AirPollutantCode
     nvarchar ProcessId
     datetime2 ProcessActivityBegin
-	datetim2 ProcessActivityEnd
+    datetim2 ProcessActivityEnd
     nvarchar MeasurementType
     nvarchar MeasurementMethod
     nvarchar MeasurementEquipment
@@ -171,7 +171,7 @@ MODEL {
 MODEL ||--o{ COMPLIANCEASSESSMENTMETHOD : "CountryCode + AssessmentMethodId + AirPollutantCode + DataAggregationProcessId"
 MODEL ||--o{ MODELLINGRESULTS : "CountryCode + AssessmentMethodId + AirPollutantCode + DataAggregationProcessId"
 MODEL ||--o{ PLANSCENARIO : "CountryCode + AssessmentMethodId + AirPollutantCode + DataAggregationProcessId"
-MODEL ||--o{ SAMPLINGPOINT_SRA : "CountryCode + AssessmentMethodId"
+MODEL ||--o{ SRArea : "CountryCode + AssessmentMethodId"
 
 GRIDZONE {
     char CountryCode
@@ -253,7 +253,7 @@ COMPLIANCEASSESSMENTMETHOD {
     bit Deletion
 }
 COMPLIANCEASSESSMENTMETHOD }o--o{ COMPLIANCEPLANLINK : "CountryCode + PlanId + ScenarioId"
-COMPLIANCEASSESSMENTMETHOD }o--o{ SAMPLINGPOINT_SRA : "CountryCode + AssessmentMethodId + SamplingPointRepresentativenessAreaId"
+COMPLIANCEASSESSMENTMETHOD }o--o{ SRArea : "CountryCode + AssessmentMethodId + SamplingPointRepresentativenessAreaId"
 
 ADJUSTMENT {
     nvarchar Country
