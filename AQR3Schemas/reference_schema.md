@@ -419,7 +419,7 @@ DOCUMENTATION {
    varchar Country
    varchar CountryCode
    varchar DataTable
-   varchar DocumentObject,
+   varchar DocumentObject
    varchar DocumentId
    varchar DocumentURL
    datetime ReportingTime
