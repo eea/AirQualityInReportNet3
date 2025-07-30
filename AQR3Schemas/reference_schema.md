@@ -13,6 +13,7 @@ AUTHORITY {
     nvarchar PersonName "not null"
     nvarchar PersonEmail "not null"
     datetime ReportingTime "not null"
+    bit Deletion
 }
 
 STATION {
@@ -29,6 +30,7 @@ STATION {
     nvarchar AQStationName
     nvarchar AirQualityStationArea
     datetime ReportingTime "not null"
+    bit Deletion
 }
 STATION ||--o{ SAMPLINGPOINT : "CountryCode + AirQualityStationEoICode"
 
@@ -84,7 +86,7 @@ SAMPLINGPROCESS {
     nvarchar DataQualityReportURL
     nvarchar EquivalenceDemonstrationReportURL
     nvarchar ProcessDocumentationURL
-    int Deletion "Not Null"
+    bit Deletion "Null"
 }
 
 MEASUREMENTRESULT {
@@ -106,7 +108,7 @@ MEASUREMENTRESULT {
     nvarchar DataAggregationProcessId
     nvarchar DataAggregationProcess
     varchar SourceDataFlow
-    int Deletion
+    bit Deletion
 }
 
 SRArea {
@@ -142,8 +144,8 @@ MODELLINGRESULTS {
     bigint X
     bigint Y
     int SpatialResolution "not null"
-    int GridNum10m
-    int GridNum100m
+    bigint GridNum10m
+    bigint GridNum100m
     bigint GridNum1km
     bigint GridNum10km
     bit Deletion
@@ -179,6 +181,7 @@ GRIDZONE {
     bigint GridNum100m
     bigint GridNum1km
     bigint GridNum10km
+    bit Deletion
 }
 
 ASSESSMENTREGIMEZONE {
@@ -216,7 +219,7 @@ ASSESSMENTREGIMEZONE {
 	int ReportedNumberOfOBESPO
 	int RequiredNumberOfModels
 	int ReportedNumberOfModels
-	int Deletion "not null"
+	bit Deletion "not null"
 }
 ASSESSMENTREGIMEZONE ||--o{ COMPLIANCEASSESSMENTMETHOD : "CountryCode + ReportingYear + AssessmentRegimeId + DataAggregationProcessId"
 
@@ -247,6 +250,7 @@ COMPLIANCEASSESSMENTMETHOD {
     decimal EEA_AirPollutionLevelAdjusted
     varchar EEA_Exceedance_Assessment
     float EEA_estimationOfMQI
+    bit Deletion
 }
 COMPLIANCEASSESSMENTMETHOD }o--o{ COMPLIANCEPLANLINK : "CountryCode + PlanId + ScenarioId"
 COMPLIANCEASSESSMENTMETHOD }o--o{ SAMPLINGPOINT_SRA : "CountryCode + AssessmentMethodId + SamplingPointRepresentativenessAreaId"
@@ -258,7 +262,7 @@ ADJUSTMENT {
     nvarchar Adj_AssessmentMethodId
     nvarchar AdjustmentSource
     decimal MaxRatioUncertainty
-    bit Deletion "not null"
+    bit Deletion "null"
 }
 ADJUSTMENT }o--o{ COMPLIANCEASSESSMENTMETHOD : "CountryCode + AttainmentId + AssessmentMethod"
 ADJUSTMENT }o--o{ MODEL : "CountryCode + AssessmentMethodId + AssessmentMethodName"
@@ -282,6 +286,7 @@ PLANSCENARIO {
     nvarchar AuthorityWebsite
     varchar AuthorityLevel
     nvarchar SupportingDocumentationURL
+    bit Deletion
 }
 PLANSCENARIO ||--o{ COMPLIANCEPLANLINK : "CountryCode + PlanId + ScenarioId"
 PLANSCENARIO ||--o{ COMPLIANCEPLANLINK : "CountryCode + PlanId + ScenarioId"
@@ -295,6 +300,7 @@ COMPLIANCEPLANLINK {
     nvarchar PlanId
     nvarchar SourceAppId
     nvarchar ScenarioId
+    bit Deletion
 }
 
 MEASURE {
@@ -315,33 +321,37 @@ MEASURE {
     varchar MeasureStatus
     int ReasonIfMeasureNotUsed "not null"
     datetime ReportingTime
+    bit Deletion
 }
 
 SCENARIOMEASURE {
-    nvarchar Country
-    nvarchar CountryCode
-    nvarchar ScenarioId
-    nvarchar AirPollutant
-    nvarchar AirPollutantCode
+    varchar Country
+    varchar CountryCode
+    varchar ScenarioId
+    varchar ScenarioCategory
+    varchar AirPollutant
+    varchar AirPollutantCode
     varchar DataAggregationProcess
     varchar DataAggregationProcessId
     nvarchar MeasureGroupId "not null"
-    float MeasureGroupAirPollutionReduction
-    int AssessmentMethodId
+    decimal MeasureGroupAirPollutionReduction
+    varchar SM_AssessmentMethodId
+    bit Deletion
 }
 SCENARIOMEASURE ||--o{ PLANSCENARIO : "CountryCode + ScenarioId + MeasureGroupId"
 SCENARIOMEASURE ||--o{ MEASURE : "CountryCode + PlanId + ScenarioId"
 
 SOURCEAPPORTIONMENT {
-    nvarchar Country
-    nvarchar CountryCode
-    nvarchar SourceAppId "not null"
-    nvarchar AirPollutant
+    varchar Country
+    varchar CountryCode
+    varchar SourceAppId "not null"
+    varchar AirPollutant
     int AirPollutantCode
     varchar ContributionType
     varchar SpatialScale
     varchar SourceSector
-    float Contribution
+    decimal Contribution
+    bit Deletion
 }
 SOURCEAPPORTIONMENT ||--o{ COMPLIANCEPLANLINK : "CountryCode + SourceAppId to AttainmentId"
 
@@ -404,6 +414,29 @@ VOCABULARY {
     date AcceptedDate
     date NotAcceptedDate
 }
+
+DOCUMENTATION {
+   varchar Country
+   varchar CountryCode
+   varchar DataTable
+   varchar DocumentObject,
+   varchar DocumentId
+   varchar DocumentURL
+   datetime ReportingTime
+   bit Deletion
+}
+
+SPATIALREPRSENTATIVENESS {
+    varchar Country
+    varchar CountryCode
+    varchar SR_Id
+    varchar SR_ApplicationId
+    varchar SR_Application
+    varchar ResultEncoding
+    varchar SR_AssessmentMethodId
+    bit  Deletion
+}
+
 ```
 
 
