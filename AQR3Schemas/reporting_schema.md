@@ -46,7 +46,7 @@ SAMPLINGPOINT {
 
 SAMPLINGPOINT ||--|| SAMPLINGPROCESS : "CountryCode + ProcessId"
 SAMPLINGPOINT }o--o{ MEASUREMENTRESULT : "CountryCode + AirPollutantCode + AssessmentMethodId"
-SAMPLINGPOINT }o--o{ COMPLIANCEASSESSMENTMETHOD : "CountryCode + AirPollutantCode + AssessmentMethodId + DataAggregationProcessId to ProcessId"
+SAMPLINGPOINT }o--o{ COMPLIANCEASSESSMENTMETHOD : "CountryCode + AirPollutantCode + AssessmentMethodId + DataAggregationProcessId + ProcessId"
 
 SAMPLINGPROCESS {
     varchar CountryCode PK
@@ -296,7 +296,6 @@ SCENARIOMEASURE {
 SCENARIOMEASURE ||--o{ PLANSCENARIO : "CountryCode + ScenarioId + MeasureGroupId"
 SCENARIOMEASURE ||--o{ MEASURE : "CountryCode + PlanId + ScenarioId"
 
-
 SOURCEAPPORTIONMENT {
     varchar CountryCode PK
     varchar SourceAppId PK "not null"
@@ -307,4 +306,5 @@ SOURCEAPPORTIONMENT {
     decimal Contribution
 }
 SOURCEAPPORTIONMENT ||--o{ COMPLIANCEPLANLINK : "CountryCode + SourceAppId to AttainmentId"
+
 ```
