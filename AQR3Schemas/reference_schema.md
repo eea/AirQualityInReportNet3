@@ -66,7 +66,7 @@ SAMPLINGPOINT {
 }
 SAMPLINGPOINT ||--|| SAMPLINGPROCESS : "CountryCode + ProcessId"
 SAMPLINGPOINT }o--o{ MEASUREMENTRESULT : "CountryCode + AirPollutantCode + AssessmentMethodId"
-SAMPLINGPOINT }o--o{ COMPLIANCEASSESSMENTMETHOD : "CountryCode + AirPollutantCode + AssessmentMethodId + DataAggregationProcessId to ProcessId"
+SAMPLINGPOINT }o--o{ COMPLIANCEASSESSMENTMETHOD : "CountryCode + AirPollutantCode + AssessmentMethodId + DataAggregationProcessId + ProcessId"
 
 SAMPLINGPROCESS {
     varchar Country
@@ -222,6 +222,7 @@ ASSESSMENTREGIMEZONE {
 	bit Deletion "not null"
 }
 ASSESSMENTREGIMEZONE ||--o{ COMPLIANCEASSESSMENTMETHOD : "CountryCode + ReportingYear + AssessmentRegimeId + DataAggregationProcessId"
+ASSESSMENTREGIMEZONE ||--o{ GRIDZONE : "ZoneId"
 
 COMPLIANCEASSESSMENTMETHOD {
     nvarchar Country
@@ -253,7 +254,7 @@ COMPLIANCEASSESSMENTMETHOD {
     bit Deletion
 }
 COMPLIANCEASSESSMENTMETHOD }o--o{ COMPLIANCEPLANLINK : "CountryCode + PlanId + ScenarioId"
-COMPLIANCEASSESSMENTMETHOD }o--o{ SRArea : "CountryCode + AssessmentMethodId + SamplingPointRepresentativenessAreaId"
+COMPLIANCEASSESSMENTMETHOD }o--o{ SRArea : "CountryCode + AssessmentMethodId + SR_ApplicationId"
 
 ADJUSTMENT {
     nvarchar Country
