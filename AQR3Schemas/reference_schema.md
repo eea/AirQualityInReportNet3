@@ -171,7 +171,7 @@ MODEL {
 MODEL ||--o{ COMPLIANCEASSESSMENTMETHOD : "CountryCode + AssessmentMethodId + AirPollutantCode + DataAggregationProcessId"
 MODEL ||--o{ MODELLINGRESULTS : "CountryCode + AssessmentMethodId + AirPollutantCode + DataAggregationProcessId"
 MODEL ||--o{ PLANSCENARIO : "CountryCode + AssessmentMethodId + AirPollutantCode + DataAggregationProcessId"
-MODEL ||--o{ SRArea : "CountryCode + AssessmentMethodId"
+MODEL ||--o{ SRArea : "CountryCode + SR_ApplicationId"
 
 GRIDZONE {
     char CountryCode
