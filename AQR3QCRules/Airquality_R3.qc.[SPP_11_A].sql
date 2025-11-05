@@ -13,7 +13,7 @@ CREATE VIEW [qc].[SPP_11_A] AS
 
 -- Creation date: 29 October 2025
 -- QC rule code: SPP_11_A
--- QC rule name: SPP.11.A Vocabulary - [SamplingEquipment]
+-- QC rule name: SPP_11_A Vocabulary - [SamplingEquipment]
 
 
 WITH CTE_samplingprocess AS ( 
