@@ -307,4 +307,12 @@ SOURCEAPPORTIONMENT {
 }
 SOURCEAPPORTIONMENT ||--o{ COMPLIANCEPLANLINK : "CountryCode + SourceAppId to AttainmentId"
 
+DOCUMENTATION {
+	varchar CountryCode PK 
+	varchar DataTable
+	varchar DocumentObject
+	varchar DocumentId
+	varchar DocumentAttachmen
+}
+
 ```
