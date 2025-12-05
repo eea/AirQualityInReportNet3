@@ -43,7 +43,6 @@ WHERE d.ZoneId IS NOT NULL  -- duplicity
    OR a.ZoneId IS NULL 
    OR a.CountryCode IS NULL
 
-
 GO
 
 
