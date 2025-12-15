@@ -21,22 +21,22 @@ CREATE VIEW [qc].[SPP_0] AS
 WITH cte_submitted AS (
   SELECT
     --record_id,
-    NULLIF("CountryCode", '') AS CountryCode,
-    NULLIF("AssessmentMethodId", '') AS AssessmentMethodId,
-    "AirPollutantCode",
-    NULLIF("ProcessId", '') AS ProcessId,
-    NULLIF("ProcessActivityBegin", '') AS ProcessActivityBegin,
-    NULLIF("ProcessActivityEnd", '') AS ProcessActivityEnd,
-    NULLIF("MeasurementType", '') AS MeasurementType,
-    NULLIF("MeasurementMethod", '') AS MeasurementMethod,
-    NULLIF("MeasurementEquipment", '') AS MeasurementEquipment,   
-    NULLIF("SamplingMethod", '') AS SamplingMethod,
-    NULLIF("SamplingEquipment", '') AS SamplingEquipment,
-    NULLIF("AnalyticalTechnique", '') AS AnalyticalTechnique,
-    NULLIF("EquivalenceDemonstrated", '') AS EquivalenceDemonstrated,
-    NULLIF("DataQualityReportId", '') AS DataQualityReportId,
-    NULLIF("EquivalenceDemonstrationReportId", '') AS EquivalenceDemonstrationReportId,
-    NULLIF("ProcessDocumentationId", '') AS ProcessDocumentationId
+    NULLIF(CountryCode, '') AS CountryCode,
+    NULLIF(AssessmentMethodId, '') AS AssessmentMethodId,
+    AirPollutantCode,
+    NULLIF(ProcessId, '') AS ProcessId,
+    NULLIF(ProcessActivityBegin, '') AS ProcessActivityBegin,
+    NULLIF(ProcessActivityEnd, '') AS ProcessActivityEnd,
+    NULLIF(MeasurementType, '') AS MeasurementType,
+    NULLIF(MeasurementMethod, '') AS MeasurementMethod,
+    NULLIF(MeasurementEquipment, '') AS MeasurementEquipment,   
+    NULLIF(SamplingMethod, '') AS SamplingMethod,
+    NULLIF(SamplingEquipment, '') AS SamplingEquipment,
+    NULLIF(AnalyticalTechnique, '') AS AnalyticalTechnique,
+    NULLIF(EquivalenceDemonstrated, '') AS EquivalenceDemonstrated,
+    NULLIF(DataQualityReportId, '') AS DataQualityReportId,
+    NULLIF(EquivalenceDemonstrationReportId, '') AS EquivalenceDemonstrationReportId,
+    NULLIF(ProcessDocumentationId, '') AS ProcessDocumentationId
   FROM reporting.SamplingProcess
 ),
 
@@ -44,22 +44,22 @@ WITH cte_submitted AS (
 cte_reference AS (
   SELECT DISTINCT
     --record_id,
-    NULLIF("CountryCode", '') AS CountryCode,
-    NULLIF("AssessmentMethodId", '') AS AssessmentMethodId,
-    "AirPollutantCode",
-    NULLIF("ProcessId", '') AS ProcessId,
-    NULLIF("ProcessActivityBegin", '') AS ProcessActivityBegin,
-    NULLIF("ProcessActivityEnd", '') AS ProcessActivityEnd,
-    NULLIF("MeasurementType", '') AS MeasurementType,
-    NULLIF("MeasurementMethod", '') AS MeasurementMethod,
-    NULLIF("MeasurementEquipment", '') AS MeasurementEquipment,   
-    NULLIF("SamplingMethod", '') AS SamplingMethod,
-    NULLIF("SamplingEquipment", '') AS SamplingEquipment,
-    NULLIF("AnalyticalTechnique", '') AS AnalyticalTechnique,
-    NULLIF("EquivalenceDemonstrated", '') AS EquivalenceDemonstrated
-    /*NULLIF("DataQualityReportId", '') AS DataQualityReportId,
-    NULLIF("EquivalenceDemonstrationReportId", '') AS EquivalenceDemonstrationReportId,
-    NULLIF("ProcessDocumentationId" '') AS ProcessDocumentationId*/
+    NULLIF(CountryCode, '') AS CountryCode,
+    NULLIF(AssessmentMethodId, '') AS AssessmentMethodId,
+    AirPollutantCode,
+    NULLIF(ProcessId, '') AS ProcessId,
+    NULLIF(ProcessActivityBegin, '') AS ProcessActivityBegin,
+    NULLIF(ProcessActivityEnd, '') AS ProcessActivityEnd,
+    NULLIF(MeasurementType, '') AS MeasurementType,
+    NULLIF(MeasurementMethod, '') AS MeasurementMethod,
+    NULLIF(MeasurementEquipment, '') AS MeasurementEquipment,   
+    NULLIF(SamplingMethod, '') AS SamplingMethod,
+    NULLIF(SamplingEquipment, '') AS SamplingEquipment,
+    NULLIF(AnalyticalTechnique, '') AS AnalyticalTechnique,
+    NULLIF(EquivalenceDemonstrated, '') AS EquivalenceDemonstrated
+    /*NULLIF(DataQualityReportId, '') AS DataQualityReportId,
+    NULLIF(EquivalenceDemonstrationReportId, '') AS EquivalenceDemonstrationReportId,
+    NULLIF(ProcessDocumentationId, '') AS ProcessDocumentationId*/
     
   FROM reference.SamplingProcess
 )
