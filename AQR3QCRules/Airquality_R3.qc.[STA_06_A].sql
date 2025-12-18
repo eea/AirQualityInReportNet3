@@ -32,12 +32,17 @@ TimeZoneCheck AS (
         TimeZoneClean,
         CASE
             WHEN TimeZoneClean= '' THEN 'Empty'
-            /*WHEN REGEXP_MATCHES(TimeZoneClean, '.*\s+.*') THEN 'Contains Spaces'
-            WHEN LENGTH(SUBSTR(TimeZoneClean, 1, 19)) <> 19 THEN 'Invalid DateTime Length'
-            WHEN NOT REGEXP_MATCHES(TimeZoneClean, '.*(Z|[+-][0-9]{2}:[0-9]{2})$') THEN 'Missing or Invalid UTC Offset'*/ -- commented in SQL Server, necessary in Reportnet 3
-			WHEN TimeZoneClean LIKE '.*\s+.*' THEN 'Contains Spaces'
-            WHEN LEN(SUBSTRING(TimeZoneClean, 1, 19)) <> 19 THEN 'Invalid DateTime Length'
-            WHEN TimeZoneClean NOT LIKE '.*(Z|[+-][0-9]{2}:[0-9]{2})$' THEN 'Missing or Invalid UTC Offset' -- added in SQL Server, it is replaced by the line from above in Reportnet 3
+
+            WHEN TimeZoneClean LIKE '.*\s+.*' THEN 'Contains Spaces'
+
+            WHEN TimeZoneClean NOT LIKE 'UTC%' 
+                 OR (
+                     TimeZoneClean <> 'UTC'
+                     AND TimeZoneClean NOT LIKE 'UTC+__:__'
+                     AND TimeZoneClean NOT LIKE 'UTC-__:__'
+                 )
+            THEN 'Invalid TimeZone Format'
+
             ELSE 'Valid'
         END AS TimeZoneStatus
     FROM CTE_stationTimeZone
