@@ -18,21 +18,23 @@ CREATE VIEW [qc].[MOD_05_A] AS
 -- Creation date: June 2025
 -- QC rule code: MOD_05_A
 -- QC rule name: MOD_05_A Vocabulary - [AssessmentType]
+-- Update date: 16 December 2025
 
 WITH 
 
 CTE_model AS ( 
   SELECT 
-    CASE WHEN assessmenttype = '' THEN NULL ELSE assessmenttype END as assessmenttype 
+    CASE WHEN assessmenttype = '' THEN NULL ELSE assessmenttype END as assessmenttype,
+    CASE WHEN assessmentmethodid = '' THEN NULL ELSE assessmentmethodid END as assessmentmethodid
   FROM reporting.Model 
 ),
 
 missing_codes AS ( 
-  SELECT * 
+  SELECT /*m.record_id,*/ m.assessmentmethodid, m.assessmenttype
   FROM CTE_model m 
   LEFT JOIN reference.Vocabulary v 
-    ON m.assessmenttype = v.label AND v.vocabulary = 'assessmenttype'
-  WHERE v.label IS NULL
+    ON m.assessmenttype = v.Notation COLLATE Latin1_General_CI_AS AND v.vocabulary = 'assessmenttype'
+  WHERE v.Notation IS NULL
 ) 
 
 SELECT * FROM missing_codes
