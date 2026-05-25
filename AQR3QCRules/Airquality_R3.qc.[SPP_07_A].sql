@@ -1,12 +1,15 @@
 USE [Airquality_R3]
 GO
 
-/****** Object:  View [qc].[SPP_07_A]    Script Date: 11/07/2025 ******/
+/****** Object:  View [qc].[SPP.07.A]    Script Date: 25/05/2026 07:58:17 ******/
 SET ANSI_NULLS ON
 GO
 
 SET QUOTED_IDENTIFIER ON
 GO
+
+
+
 
 CREATE VIEW [qc].[SPP_07_A] AS
 
@@ -24,7 +27,7 @@ SELECT /*sp.record_id,*/ sp."measurementtype" -- commented in SQL Server, necess
 FROM CTE_samplingprocess sp 
 --LEFT JOIN dataset_88666."vocabulary" v -- commented in SQL Server, necessary in Reportnet 3
 LEFT JOIN reference.Vocabulary v -- added in SQL Server, it is replaced by the line from above in Reportnet 3
-ON sp."measurementtype" = v."notation" --COLLATE Latin1_General_CI_AS 
+ON sp."measurementtype" = v."notation" COLLATE Latin1_General_CI_AS 
 AND v."vocabulary" = 'measurementtype' -- COLLATE added in SQL Server view 
 WHERE v."notation" IS NULL ) 
 

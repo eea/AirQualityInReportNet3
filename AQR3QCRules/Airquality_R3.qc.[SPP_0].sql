@@ -1,14 +1,12 @@
 USE [Airquality_R3]
 GO
 
-/****** Object:  View [qc].[SPP_0]    Script Date: 12/12/2025 ******/
+/****** Object:  View [qc].[SPP_0]    Script Date: 22/05/2026 13:47:25 ******/
 SET ANSI_NULLS ON
 GO
 
 SET QUOTED_IDENTIFIER ON
 GO
-
-
 
 
 CREATE VIEW [qc].[SPP_0] AS
@@ -23,20 +21,20 @@ WITH cte_submitted AS (
     --record_id,
     NULLIF(CountryCode, '') AS CountryCode,
     NULLIF(AssessmentMethodId, '') AS AssessmentMethodId,
-    AirPollutantCode,
+    PollutantID,
     NULLIF(ProcessId, '') AS ProcessId,
     NULLIF(ProcessActivityBegin, '') AS ProcessActivityBegin,
     NULLIF(ProcessActivityEnd, '') AS ProcessActivityEnd,
     NULLIF(MeasurementType, '') AS MeasurementType,
-    NULLIF(MeasurementMethod, '') AS MeasurementMethod,
-    NULLIF(MeasurementEquipment, '') AS MeasurementEquipment,   
-    NULLIF(SamplingMethod, '') AS SamplingMethod,
-    NULLIF(SamplingEquipment, '') AS SamplingEquipment,
+    NULLIF(Method, '') AS Method,
+    NULLIF(Equipment, '') AS Equipment,   
+    
+    
     NULLIF(AnalyticalTechnique, '') AS AnalyticalTechnique,
     NULLIF(EquivalenceDemonstrated, '') AS EquivalenceDemonstrated,
-    NULLIF(DataQualityReportId, '') AS DataQualityReportId,
-    NULLIF(EquivalenceDemonstrationReportId, '') AS EquivalenceDemonstrationReportId,
-    NULLIF(ProcessDocumentationId, '') AS ProcessDocumentationId
+    NULLIF(DataQualityDocumentId, '') AS DataQualityDocumentId,
+    NULLIF(EquivalenceDemonstrationDocumentId, '') AS EquivalenceDemonstrationDocumentId
+   
   FROM reporting.SamplingProcess
 ),
 
@@ -46,19 +44,19 @@ cte_reference AS (
     --record_id,
     NULLIF(CountryCode, '') AS CountryCode,
     NULLIF(AssessmentMethodId, '') AS AssessmentMethodId,
-    AirPollutantCode,
+    PollutantID,
     NULLIF(ProcessId, '') AS ProcessId,
     NULLIF(ProcessActivityBegin, '') AS ProcessActivityBegin,
     NULLIF(ProcessActivityEnd, '') AS ProcessActivityEnd,
     NULLIF(MeasurementType, '') AS MeasurementType,
-    NULLIF(MeasurementMethod, '') AS MeasurementMethod,
-    NULLIF(MeasurementEquipment, '') AS MeasurementEquipment,   
-    NULLIF(SamplingMethod, '') AS SamplingMethod,
-    NULLIF(SamplingEquipment, '') AS SamplingEquipment,
+    NULLIF(Method, '') AS Method,
+    NULLIF(Equipment, '') AS Equipment,   
+    
+    
     NULLIF(AnalyticalTechnique, '') AS AnalyticalTechnique,
     NULLIF(EquivalenceDemonstrated, '') AS EquivalenceDemonstrated
-    /*NULLIF(DataQualityReportId, '') AS DataQualityReportId,
-    NULLIF(EquivalenceDemonstrationReportId, '') AS EquivalenceDemonstrationReportId,
+    /*NULLIF(DataQualityDocumentId, '') AS DataQualityDocumentId,
+    NULLIF(EquivalenceDemonstrationDocumentId, '') AS EquivalenceDemonstrationDocumentId,
     NULLIF(ProcessDocumentationId, '') AS ProcessDocumentationId*/
     
   FROM reference.SamplingProcess
@@ -79,13 +77,13 @@ SELECT
      AND COALESCE(s."AssessmentMethodId", '') = COALESCE(r."AssessmentMethodId", '')
      AND COALESCE(s."ProcessId", '') = COALESCE(r."ProcessId", '')
      AND COALESCE(s."ProcessActivityBegin", '') = COALESCE(r."ProcessActivityBegin", '')
-     AND COALESCE(s."AirPollutantCode", '') = COALESCE(r."AirPollutantCode", '')
+     AND COALESCE(s."PollutantID", '') = COALESCE(r."PollutantID", '')
      AND COALESCE(s."ProcessActivityEnd", '') = COALESCE(r."ProcessActivityEnd", '')
      AND COALESCE(s."MeasurementType", '') = COALESCE(r."MeasurementType", '')
-     AND COALESCE(s."MeasurementMethod", '') = COALESCE(r."MeasurementMethod", '')
-     AND COALESCE(s."MeasurementEquipment", '') = COALESCE(r."MeasurementEquipment", '')
-     AND COALESCE(s."SamplingMethod", '') = COALESCE(r."SamplingMethod", '') 
-     AND COALESCE(s."SamplingEquipment", '') = COALESCE(r."SamplingEquipment", '')  
+     AND COALESCE(s."Method", '') = COALESCE(r."Method", '')
+     AND COALESCE(s."Equipment", '') = COALESCE(r."Equipment", '')
+     
+     
      AND COALESCE(s."AnalyticalTechnique", '') = COALESCE(r."AnalyticalTechnique", '')  
      AND COALESCE(s."EquivalenceDemonstrated", '') = COALESCE(r."EquivalenceDemonstrated", '')    
     THEN 'No modification'
