@@ -1,12 +1,13 @@
 USE [Airquality_R3]
 GO
 
-/****** Object:  View [qc].[STA_0]  Script Date: 27/10/2025  ******/
+/****** Object:  View [qc].[STA_0_OLD]    Script Date: 25/05/2026 14:10:38 ******/
 SET ANSI_NULLS ON
 GO
 
 SET QUOTED_IDENTIFIER ON
 GO
+
 
 CREATE VIEW [qc].[STA_0] AS
 
@@ -19,38 +20,40 @@ WITH cte_submitted AS (
   SELECT
     -- record_id,
     NULLIF(CountryCode, '') AS CountryCode,
-    NULLIF(AirQualityStationEoICode, '') AS AirQualityStationEoICode,
-    NULLIF(AirQualityNetwork, '') AS AirQualityNetwork,
-    NULLIF(AirQualityNetworkOrganisationalLevel, '') AS AirQualityNetworkOrganisationalLevel,
+    NULLIF(StationNationalCode, '') AS StationNationalCode,
+    NULLIF(NetworkId, '') AS NetworkId,
+    NULLIF(NetworkOrganisationalLevel, '') AS NetworkOrganisationalLevel,
     NULLIF(Timezone, '') AS Timezone
 
-  FROM reporting.Station
+  FROM reporting.MeasurementStation
 ),
 
 cte_reference AS (
   SELECT
     NULLIF(CountryCode, '') AS CountryCode,
-    NULLIF(AirQualityStationEoICode, '') AS AirQualityStationEoICode,
-    NULLIF(AirQualityNetworkOrganisationalLevel, '') AS AirQualityNetworkOrganisationalLevel,
+    NULLIF(StationNationalCode, '') AS StationNationalCode,
+    NULLIF(NetworkOrganisationalLevel, '') AS NetworkOrganisationalLevel,
     Deletion,
     ReportingTime
 
-  FROM reference.Station
+  FROM reference.MeasurementStation
 )
 
 SELECT
   -- s.record_id,
   s.CountryCode,
-  s.AirQualityStationEoICode,
+  s.StationNationalCode,
   CASE
     WHEN r.CountryCode IS NULL THEN 'Addition of new record'
-    WHEN COALESCE(s.AirQualityNetworkOrganisationalLevel, '') = COALESCE(r.AirQualityNetworkOrganisationalLevel, '')
+    WHEN COALESCE(s.NetworkOrganisationalLevel, '') = COALESCE(r.NetworkOrganisationalLevel, '')
     THEN 'No modification'
     ELSE 'Modification of existing record'
   END AS record_status
 FROM cte_submitted s
 LEFT JOIN cte_reference r
   ON s.CountryCode = r.CountryCode
- AND s.AirQualityStationEoICode = r.AirQualityStationEoICode
+ AND s.StationNationalCode = r.StationNationalCode
 
 GO
+
+
