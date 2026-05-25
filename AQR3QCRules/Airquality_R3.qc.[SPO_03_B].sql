@@ -1,7 +1,7 @@
 USE [Airquality_R3]
 GO
 
-/****** Object:  View [qc].[SPO_03_B]    Script Date: 17/07/2025 ******/
+/****** Object:  View [qc].[SPO.03.B]    Script Date: 25/05/2026 14:37:07 ******/
 SET ANSI_NULLS ON
 GO
 
@@ -9,11 +9,12 @@ SET QUOTED_IDENTIFIER ON
 GO
 
 
+
 CREATE VIEW [qc].[SPO_03_B] AS
 
 -- Creation date: July 2025
--- QC rule code: SPO_03_B
--- QC rule name: SPO_03_B Constraint - [AirPollutantCode] SPO_02
+-- QC rule code: SPO.03.B
+-- QC rule name: SPO.03.B Constraint - [AirPollutantCode] SPO.02
 
 WITH 
 CTE_samplingPoint AS (
@@ -21,10 +22,10 @@ CTE_samplingPoint AS (
     /*record_id
     ,*/CASE WHEN "assessmentmethodid" = '' THEN NULL 
       ELSE "assessmentmethodid" END as "assessmentmethodid"
-    ,CASE WHEN "airpollutantcode" = '' THEN NULL 
+    ,CASE WHEN "PollutantId" = '' THEN NULL 
 	  --WHEN ISNUMERIC("airpollutantcode") THEN CAST(CAST("airpollutantcode" AS NUMERIC(32,16)) AS INTEGER) -- Reportnet 3
-      WHEN ISNUMERIC("airpollutantcode") = 1 THEN CAST(CAST("airpollutantcode" AS NUMERIC(32,16)) AS INTEGER) -- SQL Server view
-      ELSE NULL END as "airpollutantcode"
+      WHEN ISNUMERIC("PollutantId") = 1 THEN CAST(CAST("PollutantId" AS NUMERIC(32,16)) AS INTEGER) -- SQL Server view
+      ELSE NULL END as "PollutantId"
     FROM reporting."samplingpoint"
 )
 
@@ -32,10 +33,10 @@ CTE_samplingPoint AS (
   SELECT DISTINCT 
          sp."assessmentmethodid",
          --COUNT(DISTINCT(sp."airpollutantcode")) -- Reportnet 3
-		 COUNT(DISTINCT(sp."airpollutantcode")) AS CountingAirPollutantCode -- SQL Server view
+		 COUNT(DISTINCT(sp."PollutantId")) AS CountingAirPollutantCode -- SQL Server view
   FROM CTE_samplingPoint sp 
   GROUP BY sp."assessmentmethodid"
-  HAVING COUNT(DISTINCT(sp."airpollutantcode")) > 1
+  HAVING COUNT(DISTINCT(sp."PollutantId")) > 1
 ) 
 
 SELECT -- record_id -- Reportnet 3

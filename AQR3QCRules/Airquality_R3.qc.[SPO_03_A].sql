@@ -1,7 +1,7 @@
 USE [Airquality_R3]
 GO
 
-/****** Object:  View [qc].[SPO_03_A]    Script Date: 17/07/2025 ******/
+/****** Object:  View [qc].[SPO.03.A]    Script Date: 25/05/2026 14:32:52 ******/
 SET ANSI_NULLS ON
 GO
 
@@ -9,22 +9,23 @@ SET QUOTED_IDENTIFIER ON
 GO
 
 
+
 CREATE VIEW [qc].[SPO_03_A] AS
 
 -- Creation date: July 2025
--- QC rule code: SPO_03_A
--- QC rule name: SPO_03_A Vocabulary - [AirPollutantCode]
+-- QC rule code: SPO.03.A
+-- QC rule name: SPO.03.A Vocabulary - [AirPollutantCode]
 
 WITH CTE_samplingpoint AS ( 
 SELECT --record_id ,
-CASE WHEN "airpollutantcode" = '' THEN NULL ELSE "airpollutantcode" END as "airpollutantcode" 
+CASE WHEN "PollutantId" = '' THEN NULL ELSE "PollutantId" END as "PollutantId" 
 FROM reporting."samplingpoint" ) 
 
 ,missing_codes AS ( 
-SELECT /*sp.record_id,*/ sp."airpollutantcode" 
+SELECT /*sp.record_id,*/ sp."PollutantId" 
 FROM CTE_samplingpoint sp 
 LEFT JOIN reference."vocabulary" v 
-ON sp."airpollutantcode" = v."notation" AND v."vocabulary" = 'pollutant'
+ON sp."PollutantId" = v."notation" AND v."vocabulary" = 'pollutant'
 WHERE v."notation" IS NULL ) 
 
 SELECT DISTINCT * FROM missing_codes
