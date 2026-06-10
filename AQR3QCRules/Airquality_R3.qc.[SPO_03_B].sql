@@ -1,7 +1,7 @@
 USE [Airquality_R3]
 GO
 
-/****** Object:  View [qc].[SPO.03.B]    Script Date: 25/05/2026 14:37:07 ******/
+/****** Object:  View [qc].[SPO_03_B_TEST]    Script Date: 10/06/2026 12:51:01 ******/
 SET ANSI_NULLS ON
 GO
 
@@ -10,9 +10,12 @@ GO
 
 
 
+
+
+
 CREATE VIEW [qc].[SPO_03_B] AS
 
--- Creation date: July 2025
+-- Creation date: June 2026
 -- QC rule code: SPO.03.B
 -- QC rule name: SPO.03.B Constraint - [AirPollutantCode] SPO.02
 

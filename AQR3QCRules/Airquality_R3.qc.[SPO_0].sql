@@ -1,7 +1,7 @@
 USE [Airquality_R3]
 GO
 
-/****** Object:  View [qc].[SPO_0_OLD]    Script Date: 25/05/2026 16:03:54 ******/
+/****** Object:  View [qc].[SPO_0]    Script Date: 10/06/2026 14:06:48 ******/
 SET ANSI_NULLS ON
 GO
 
@@ -10,12 +10,13 @@ GO
 
 
 
+
 CREATE VIEW [qc].[SPO_0] AS
 
 -- Creation date: 27 September 2025
 -- QC rule code: SPO_0
 -- QC rule name: SPO_0 Status - [PK]
--- Modification date: 20 November 2025
+-- Modification date: June 2026
 
 
 WITH cte_submitted AS (

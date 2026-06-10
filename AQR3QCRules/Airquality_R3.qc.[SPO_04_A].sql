@@ -1,7 +1,7 @@
 USE [Airquality_R3]
 GO
 
-/****** Object:  View [qc].[SPO.04.A]    Script Date: 25/05/2026 14:38:30 ******/
+/****** Object:  View [qc].[SPO_04_A]    Script Date: 10/06/2026 13:37:37 ******/
 SET ANSI_NULLS ON
 GO
 
@@ -11,9 +11,10 @@ GO
 
 
 
+
 CREATE VIEW [qc].[SPO_04_A] AS
 
--- Creation date: July 2025
+-- Creation date: June 2026
 -- QC rule code: SPO.04.A
 -- QC rule name: SPO.04.A Cross-check - [AirQualityStationEoICode] STA.02
 
