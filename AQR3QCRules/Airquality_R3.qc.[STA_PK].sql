@@ -1,7 +1,7 @@
 USE [Airquality_R3]
 GO
 
-/****** Object:  View [qc].[STA_PK]    Script Date: 25/05/2026 14:12:47 ******/
+/****** Object:  View [qc].[STA_PK]    Script Date: 11/06/2026 13:42:42 ******/
 SET ANSI_NULLS ON
 GO
 
@@ -9,37 +9,38 @@ SET QUOTED_IDENTIFIER ON
 GO
 
 
+
+
 CREATE VIEW [qc].[STA_PK] AS
 
--- Creation date: 02 September 2025
 -- QC rule code: STA.PK
 -- QC rule name: STA.PK Constraint - [CountryCode,AirQualityStationEoICode]
 
 WITH CTE_station AS (
   SELECT 
     
-    NULLIF(StationNationalCode, '') AS StationNationalCode,
+    NULLIF(StationEoICode, '') AS StationEoICode,
     NULLIF("CountryCode", '') AS CountryCode
    
   FROM reporting.MeasurementStation
 ),
 duplicate_sta_records AS (
   SELECT 
-    StationNationalCode,
+    StationEoICode,
     CountryCode
   FROM CTE_station 
-  GROUP BY StationNationalCode, CountryCode
+  GROUP BY StationEoICode, CountryCode
   HAVING COUNT(*) > 1
 )
 SELECT 
-  /*a.record_id,*/a.StationNationalCode,a.CountryCode
+  /*a.record_id,*/a.StationEoICode,a.CountryCode
 FROM CTE_station a
 LEFT JOIN duplicate_sta_records d
-  ON a.StationNationalCode = d.StationNationalCode
+  ON a.StationEoICode = d.StationEoICode
  AND a.CountryCode = d.CountryCode
  
-WHERE d.StationNationalCode IS NOT NULL  -- duplicity
-   OR a.StationNationalCode IS NULL 
+WHERE d.StationEoICode IS NOT NULL  -- duplicity
+   OR a.StationEoICode IS NULL 
    OR a.CountryCode IS NULL
    
 

@@ -1,7 +1,7 @@
 USE [Airquality_R3]
 GO
 
-/****** Object:  View [qc].[STA.07.A]    Script Date: 25/05/2026 14:00:11 ******/
+/****** Object:  View [qc].[STA_07_A]    Script Date: 11/06/2026 13:01:56 ******/
 SET ANSI_NULLS ON
 GO
 
@@ -9,26 +9,28 @@ SET QUOTED_IDENTIFIER ON
 GO
 
 
+
+
 CREATE VIEW [qc].[STA_07_A] AS
 
--- Creation date: 02 September 2025
+
 -- QC rule code: STA.07.A
 -- QC rule name: STA.07.A Format - [AirQualityStationEoICode]
 
 WITH CTE_station AS ( 
   SELECT 
     /*record_id,*/
-    NULLIF(StationNationalCode, '') AS StationNationalCode
+    NULLIF(StationEoICode, '') AS StationEoICode
   FROM reporting.MeasurementStation
-  WHERE StationNationalCode IS NOT NULL 
+  WHERE StationEoICode IS NOT NULL 
 ),
 StationCodeCheck AS (
     SELECT 
        /* record_id,*/
-        StationNationalCode,
+        StationEoICode,
         CASE
-             WHEN StationNationalCode LIKE '[A-Z][A-Z][A-Z0-9][A-Z0-9][A-Z0-9][A-Z0-9][A-Z0-9]' 
-         AND LEN(StationNationalCode) = 7
+             WHEN StationEoICode LIKE '[A-Z][A-Z][A-Z0-9][A-Z0-9][A-Z0-9][A-Z0-9][A-Z0-9]' 
+         AND LEN(StationEoICode) = 7
                  THEN 'Valid'
             ELSE 'Invalid'
         END AS CodeStatus
