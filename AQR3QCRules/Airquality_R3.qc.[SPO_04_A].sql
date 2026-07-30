@@ -1,54 +1,45 @@
 USE [Airquality_R3]
 GO
 
-/****** Object:  View [qc].[SPO_04_A]    Script Date: 10/06/2026 13:37:37 ******/
 SET ANSI_NULLS ON
 GO
 
 SET QUOTED_IDENTIFIER ON
 GO
 
+CREATE OR ALTER VIEW [qctesting].[SPO_04_A_TEST]
+AS
 
+WITH src AS
+(
+    SELECT
+        [CountryCode],
+        [AssessmentMethodId],
 
+        [PollutantID]
 
-
-CREATE VIEW [qc].[SPO_04_A] AS
-
--- Creation date: June 2026
--- QC rule code: SPO.04.A
--- QC rule name: SPO.04.A Cross-check - [AirQualityStationEoICode] STA.02
-
-WITH CTE_samplingpoint AS (
-  SELECT --record_id,
-         CASE WHEN "StationEoICode" = '' THEN NULL 
-              ELSE "StationEoICode" 
-         END AS "StationEoICode"
-  FROM reporting."samplingpoint"
+    FROM reporting.SamplingPoint
 ),
 
-CTE_codes_from_SPOreportingTable_missing_in_StationReportingTable AS (
-  SELECT /*record_id,*/ SPOreporting."StationEoICode"
-  FROM CTE_samplingpoint as SPOreporting
-  WHERE NOT EXISTS (
-    SELECT StationReporting."StationEoICode"
-	FROM reporting.MeasurementStation StationReporting 
-	WHERE SPOreporting."StationEoICode" = StationReporting ."StationEoICode"
-  ) 
-),
-
-CTE_codes_missing_from_StationReportingTable_missing_in_StationRefTable AS (
-  SELECT /*record_id,*/ StationReporting."StationEoICode"
-  FROM CTE_codes_from_SPOreportingTable_missing_in_StationReportingTable as StationReporting
-  WHERE NOT EXISTS (
-    SELECT StationRef."StationEoICode"
-	FROM reference.MeasurementStation StationRef 
-	WHERE StationReporting."StationEoICode" = StationRef."StationEoICode"
-  ) 
+CTE_pollutant AS
+(
+    SELECT
+        PollutantID
+    FROM reference.AirPollutant
 )
 
-SELECT DISTINCT * --record_id,
-FROM CTE_codes_missing_from_StationReportingTable_missing_in_StationRefTable
+SELECT
+    s.CountryCode,
+    s.AssessmentMethodId,
+    s.PollutantID
+
+FROM src s
+
+LEFT JOIN CTE_pollutant p
+    ON s.PollutantID = p.PollutantID
+
+WHERE
+    s.PollutantID IS NULL
+    OR p.PollutantID IS NULL;
 
 GO
-
-

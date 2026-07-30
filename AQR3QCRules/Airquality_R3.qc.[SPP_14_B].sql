@@ -7,7 +7,7 @@ GO
 SET QUOTED_IDENTIFIER ON
 GO
 
-CREATE OR ALTER VIEW [qctesting].[SPP_12_B_TEST]
+CREATE OR ALTER VIEW [qctesting].[SPP_14_B_TEST]
 AS
 
 WITH src AS
@@ -19,9 +19,9 @@ WITH src AS
         ) AS CountryCode,
 
         NULLIF(
-            LTRIM(RTRIM([DataQualityReportId])),
+            LTRIM(RTRIM([ProcessDocumentationId])),
             ''
-        ) AS DataQualityReportId
+        ) AS ProcessDocumentationId
 
     FROM reporting.SamplingProcess
 ),
@@ -47,21 +47,21 @@ documentation AS
 
 SELECT
     s.CountryCode,
-    s.DataQualityReportId
+    s.ProcessDocumentationId
 
 FROM src s
 
 LEFT JOIN documentation d
     ON s.CountryCode = d.CountryCode
-   AND s.DataQualityReportId = d.DocumentId
+   AND s.ProcessDocumentationId = d.DocumentId
 
 WHERE
-    s.DataQualityReportId IS NOT NULL
+    s.ProcessDocumentationId IS NOT NULL
     AND
     (
         d.DocumentId IS NULL
         OR d.DataTable <> 'aq/datatable/SamplingProcess'
-        OR d.DocumentObject <> 'aq/documenttype/DataQualityDocumentId'
+        OR d.DocumentObject <> 'aq/documenttype/ProcessDocumentId'
     );
 
 GO

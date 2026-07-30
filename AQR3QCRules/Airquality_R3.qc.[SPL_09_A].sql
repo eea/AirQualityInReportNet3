@@ -1,17 +1,14 @@
 USE [Airquality_R3]
 GO
 
-/****** Object:  View [qc].[SPL_09_A] ******/
 SET ANSI_NULLS ON
 GO
 
 SET QUOTED_IDENTIFIER ON
 GO
 
-
-CREATE VIEW [qctesting].[SPL_09_A_TEST] 
+CREATE OR ALTER VIEW [qctesting].[SPL_09_A_TEST]
 AS
-
 
 WITH src AS
 (
@@ -20,11 +17,16 @@ WITH src AS
         [AssessmentMethodId],
         [Latitude],
 
-        NULLIF(LTRIM(RTRIM(CONVERT(nvarchar(50), [Latitude]))), '') AS Latitude_str,
+        NULLIF(
+            LTRIM(RTRIM(CONVERT(nvarchar(50), [Latitude]))),
+            ''
+        ) AS Latitude_str,
 
-        TRY_CONVERT(decimal(18,4),
+        TRY_CONVERT(
+            decimal(18,4),
             NULLIF(LTRIM(RTRIM(CONVERT(nvarchar(50), [Latitude]))), '')
-        ) AS Latitude_dec
+        ) AS Latitude_num
+
     FROM reporting.SamplingPointLocation
 )
 
@@ -39,8 +41,12 @@ WHERE
     Latitude_str IS NOT NULL
     AND
     (
-        Latitude_dec IS NULL
+        Latitude_num IS NULL
+
         OR Latitude_str NOT LIKE '%.___ _'
+
+        OR Latitude_num < -90
+        OR Latitude_num > 90
     );
 
 GO

@@ -1,40 +1,67 @@
 USE [Airquality_R3]
 GO
 
-/****** Object:  View [qc].[[[SPP_14_A]]]    Script Date: 30/10/2025 ******/
 SET ANSI_NULLS ON
 GO
 
 SET QUOTED_IDENTIFIER ON
 GO
 
+CREATE OR ALTER VIEW [qctesting].[SPP_14_A_TEST]
+AS
 
-CREATE VIEW [qc].[SPP_14_A] AS
-WITH sp AS (
-SELECT
-[CountryCode],
-[AssessmentMethodId],
-NULLIF(LTRIM(RTRIM(CONVERT(nvarchar(200), [ProcessDocumentId]))), '') AS [ProcessDocumentId]
-FROM [reporting].[SamplingProcess]
+WITH src AS
+(
+    SELECT
+        NULLIF(
+            LTRIM(RTRIM([CountryCode])),
+            ''
+        ) AS CountryCode,
+
+        NULLIF(
+            LTRIM(RTRIM([ProcessDocumentationId])),
+            ''
+        ) AS ProcessDocumentationId
+
+    FROM reporting.SamplingProcess
 ),
-doc_r AS (
-SELECT DISTINCT
-NULLIF(LTRIM(RTRIM(CONVERT(nvarchar(200), [DocumentId]))), '') AS [DocumentId]
-FROM [reporting].[Documentation]
+
+reporting_documentation AS
+(
+    SELECT DISTINCT
+        CountryCode,
+        DocumentId
+    FROM reporting.Documentation
 ),
-doc_ref AS (
-SELECT DISTINCT
-NULLIF(LTRIM(RTRIM(CONVERT(nvarchar(200), [DocumentId]))), '') AS [DocumentId]
-FROM [reference].[Documentation]
+
+reference_documentation AS
+(
+    SELECT DISTINCT
+        CountryCode,
+        DocumentId
+    FROM reference.Documentation
 )
+
 SELECT
-s.[CountryCode],
-s.[AssessmentMethodId],
-s.[ProcessDocumentId]
-FROM sp s
-WHERE s.[ProcessDocumentId] IS NULL
-OR (
-NOT EXISTS (SELECT 1 FROM doc_r r WHERE r.[DocumentId] = s.[ProcessDocumentId])
-AND NOT EXISTS (SELECT 1 FROM doc_ref f WHERE f.[DocumentId] = s.[ProcessDocumentId])
-);
+    s.CountryCode,
+    s.ProcessDocumentationId
+
+FROM src s
+
+LEFT JOIN reporting_documentation pd
+    ON s.CountryCode = pd.CountryCode
+   AND s.ProcessDocumentationId = pd.DocumentId
+
+LEFT JOIN reference_documentation rd
+    ON s.CountryCode = rd.CountryCode
+   AND s.ProcessDocumentationId = rd.DocumentId
+
+WHERE
+    s.ProcessDocumentationId IS NULL
+    OR
+    (
+        pd.DocumentId IS NULL
+        AND rd.DocumentId IS NULL
+    );
+
 GO

@@ -1,50 +1,58 @@
 USE [Airquality_R3]
 GO
 
-/****** Object:  View [qc].[SPL_10_B] ******/
 SET ANSI_NULLS ON
 GO
 
 SET QUOTED_IDENTIFIER ON
 GO
 
-
-CREATE VIEW [qctesting].[SPL_10_B_TEST] AS
+CREATE OR ALTER VIEW [qctesting].[SPL_10_B_TEST]
+AS
 
 WITH src AS
 (
     SELECT
         [CountryCode],
         [AssessmentMethodId],
+        [Latitude],
         [Longitude],
 
-        NULLIF(
-            LTRIM(RTRIM(CONVERT(nvarchar(50), [Longitude]))),
-            ''
-        ) AS Longitude_str,
-
-        TRY_CONVERT(
-            decimal(9,6),
-            NULLIF(LTRIM(RTRIM(CONVERT(nvarchar(50), [Longitude]))), '')
-        ) AS Longitude_num
+        TRY_CONVERT(decimal(18,4), [Latitude]) AS Latitude_num,
+        TRY_CONVERT(decimal(18,4), [Longitude]) AS Longitude_num
 
     FROM reporting.SamplingPointLocation
 )
 
 SELECT
-    [CountryCode],
-    [AssessmentMethodId],
-    [Longitude]
+    src.[CountryCode],
+    src.[AssessmentMethodId],
+    src.[Latitude],
+    src.[Longitude]
 
 FROM src
 
 WHERE
-    Longitude_str IS NOT NULL
-    AND
+    Latitude_num IS NOT NULL
+    AND Longitude_num IS NOT NULL
+
+    AND NOT EXISTS
     (
-        Longitude_num IS NULL
-        OR Longitude_num < -180
-        OR Longitude_num > 180
+        SELECT 1
+        FROM reporting.ZoneGeometry zg
+        WHERE
+            zg.CountryCode = src.CountryCode
+
+            /*
+                TODO:
+                ZoneGeometryGeoJson is currently stored as GeoJSON text.
+
+                Once a supported conversion from GeoJSON to a SQL Server
+                geometry/geography object is available, verify that the point
+                defined by Longitude_num and Latitude_num falls within at least
+                one ZoneGeometryGeoJson for the same CountryCode.
+
+            */
     );
 
 GO

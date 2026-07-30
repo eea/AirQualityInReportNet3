@@ -1,40 +1,67 @@
 USE [Airquality_R3]
 GO
 
-/****** Object:  View [qc].[[SPP_13_A]]     ******/
 SET ANSI_NULLS ON
 GO
 
 SET QUOTED_IDENTIFIER ON
 GO
 
+CREATE OR ALTER VIEW [qctesting].[SPP_13_A_TEST]
+AS
 
-CREATE VIEW [qc].[SPP_13_A] AS
-WITH sp AS (
-SELECT
-[CountryCode],
-[AssessmentMethodId],
-NULLIF(LTRIM(RTRIM(CONVERT(nvarchar(200), [EquivalenceDemonstrationDocumentId]))), '') AS [EquivalenceDemonstrationDocumentId]
-FROM [reporting].[SamplingProcess]
+WITH src AS
+(
+    SELECT
+        NULLIF(
+            LTRIM(RTRIM([CountryCode])),
+            ''
+        ) AS CountryCode,
+
+        NULLIF(
+            LTRIM(RTRIM([EquivalenceDemonstrationReportId])),
+            ''
+        ) AS EquivalenceDemonstrationReportId
+
+    FROM reporting.SamplingProcess
 ),
-doc_r AS (
-SELECT DISTINCT
-NULLIF(LTRIM(RTRIM(CONVERT(nvarchar(200), [DocumentId]))), '') AS [DocumentId]
-FROM [reporting].[Documentation]
+
+reporting_documentation AS
+(
+    SELECT DISTINCT
+        CountryCode,
+        DocumentId
+    FROM reporting.Documentation
 ),
-doc_ref AS (
-SELECT DISTINCT
-NULLIF(LTRIM(RTRIM(CONVERT(nvarchar(200), [DocumentId]))), '') AS [DocumentId]
-FROM [reference].[Documentation]
+
+reference_documentation AS
+(
+    SELECT DISTINCT
+        CountryCode,
+        DocumentId
+    FROM reference.Documentation
 )
+
 SELECT
-s.[CountryCode],
-s.[AssessmentMethodId],
-s.[EquivalenceDemonstrationDocumentId]
-FROM sp s
-WHERE s.[EquivalenceDemonstrationDocumentId] IS NULL
-OR (
-NOT EXISTS (SELECT 1 FROM doc_r r WHERE r.[DocumentId] = s.[EquivalenceDemonstrationDocumentId])
-AND NOT EXISTS (SELECT 1 FROM doc_ref f WHERE f.[DocumentId] = s.[EquivalenceDemonstrationDocumentId])
-);
-go
+    s.CountryCode,
+    s.EquivalenceDemonstrationReportId
+
+FROM src s
+
+LEFT JOIN reporting_documentation pd
+    ON s.CountryCode = pd.CountryCode
+   AND s.EquivalenceDemonstrationReportId = pd.DocumentId
+
+LEFT JOIN reference_documentation rd
+    ON s.CountryCode = rd.CountryCode
+   AND s.EquivalenceDemonstrationReportId = rd.DocumentId
+
+WHERE
+    s.EquivalenceDemonstrationReportId IS NULL
+    OR
+    (
+        pd.DocumentId IS NULL
+        AND rd.DocumentId IS NULL
+    );
+
+GO

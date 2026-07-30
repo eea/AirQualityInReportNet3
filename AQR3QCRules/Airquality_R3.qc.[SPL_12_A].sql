@@ -1,7 +1,7 @@
 USE [Airquality_R3]
 GO
 
-/****** Object:  View [qc].[SPL_09_B] ******/
+/****** Object:  View [qc].[SPL_12_A] ******/
 SET ANSI_NULLS ON
 GO
 
@@ -9,7 +9,7 @@ SET QUOTED_IDENTIFIER ON
 GO
 
 
-CREATE VIEW [qctesting].[SPL_09_B_TEST] AS
+CREATE VIEW [qctesting].[SPL_12_A_TEST] AS
 
 
 WITH src AS
@@ -17,17 +17,17 @@ WITH src AS
     SELECT
         [CountryCode],
         [AssessmentMethodId],
-        [Altitude],
+        [InletHeight],
 
         NULLIF(
-            LTRIM(RTRIM(CONVERT(nvarchar(50), [Altitude]))),
+            LTRIM(RTRIM(CONVERT(nvarchar(50), [InletHeight]))),
             ''
-        ) AS Altitude_str,
+        ) AS InletHeight_str,
 
         TRY_CONVERT(
             decimal(9,6),
-            NULLIF(LTRIM(RTRIM(CONVERT(nvarchar(50), [Altitude]))), '')
-        ) AS Altitude_num
+            NULLIF(LTRIM(RTRIM(CONVERT(nvarchar(50), [InletHeight]))), '')
+        ) AS InletHeight_num
 
     FROM reporting.SamplingPointLocation
 )
@@ -35,17 +35,17 @@ WITH src AS
 SELECT
     [CountryCode],
     [AssessmentMethodId],
-    [Altitude]
+    [InletHeight]
 
 FROM src
 
 WHERE
-    Altitude_str IS NOT NULL
+    InletHeight_str IS NOT NULL
     AND
     (
-        Altitude_num IS NULL
-        OR Altitude_num < -50
-        OR Altitude_num > 6000
+        InletHeight_num IS NULL
+        OR InletHeight_num <= 0
+        OR InletHeight_num >= 30
     );
 
 GO

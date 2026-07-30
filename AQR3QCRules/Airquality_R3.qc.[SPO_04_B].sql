@@ -7,7 +7,7 @@ GO
 SET QUOTED_IDENTIFIER ON
 GO
 
-CREATE OR ALTER VIEW [qctesting].[SPO_03_A_TEST]
+CREATE OR ALTER VIEW [qctesting].[SPO_04_B_TEST]
 AS
 
 WITH src AS
@@ -19,9 +19,11 @@ WITH src AS
         ) AS CountryCode,
 
         NULLIF(
-            LTRIM(RTRIM([SamplingPointRef])),
+            LTRIM(RTRIM([AssessmentMethodId])),
             ''
-        ) AS SamplingPointRef
+        ) AS AssessmentMethodId,
+
+        [PollutantId]
 
     FROM reporting.SamplingPoint
 ),
@@ -30,44 +32,44 @@ duplicates AS
 (
     SELECT
         CountryCode,
-        SamplingPointRef
+        AssessmentMethodId
     FROM src
     GROUP BY
         CountryCode,
-        SamplingPointRef
-    HAVING COUNT(*) > 1
+        AssessmentMethodId
+    HAVING COUNT(DISTINCT PollutantId) > 1
 ),
 
 reference_samplingpoint AS
 (
     SELECT
         CountryCode,
-        SamplingPointRef,
-        COUNT(*) AS RefCount
+        AssessmentMethodId,
+        PollutantId
     FROM reference.SamplingPoint
-    GROUP BY
-        CountryCode,
-        SamplingPointRef
 )
 
 SELECT
     s.CountryCode,
-    s.SamplingPointRef
+    s.AssessmentMethodId,
+    s.PollutantId
 
 FROM src s
 
 LEFT JOIN duplicates d
     ON s.CountryCode = d.CountryCode
-   AND s.SamplingPointRef = d.SamplingPointRef
+   AND s.AssessmentMethodId = d.AssessmentMethodId
 
 LEFT JOIN reference_samplingpoint r
     ON s.CountryCode = r.CountryCode
-   AND s.SamplingPointRef = r.SamplingPointRef
+   AND s.AssessmentMethodId = r.AssessmentMethodId
 
 WHERE
-    s.SamplingPointRef IS NULL
-    OR d.CountryCode IS NOT NULL
-    OR r.RefCount IS NULL
-    OR r.RefCount <> 1;
+    d.CountryCode IS NOT NULL
+    OR
+    (
+        r.AssessmentMethodId IS NOT NULL
+        AND s.PollutantId <> r.PollutantId
+    );
 
 GO
