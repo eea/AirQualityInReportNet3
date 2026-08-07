@@ -19,9 +19,9 @@ WITH src AS
         ) AS CountryCode,
 
         NULLIF(
-            LTRIM(RTRIM([SamplingPointRef])),
+            LTRIM(RTRIM([SamplingPointReferenceId])),
             ''
-        ) AS SamplingPointRef,
+        ) AS SamplingPointReferenceId,
 
         NULLIF(
             LTRIM(RTRIM([AssessmentMethodId])),
@@ -35,11 +35,11 @@ duplicates AS
 (
     SELECT
         CountryCode,
-        SamplingPointRef
+        SamplingPointReferenceId
     FROM src
     GROUP BY
         CountryCode,
-        SamplingPointRef
+        SamplingPointReferenceId
     HAVING COUNT(DISTINCT AssessmentMethodId) > 1
 ),
 
@@ -47,31 +47,31 @@ reference_samplingpoint AS
 (
     SELECT
         CountryCode,
-        SamplingPointRef,
+        SamplingPointReferenceId,
         AssessmentMethodId
     FROM reference.SamplingPoint
 )
 
 SELECT
     s.CountryCode,
-    s.SamplingPointRef,
+    s.SamplingPointReferenceId,
     s.AssessmentMethodId
 
 FROM src s
 
 LEFT JOIN duplicates d
     ON s.CountryCode = d.CountryCode
-   AND s.SamplingPointRef = d.SamplingPointRef
+   AND s.SamplingPointReferenceId = d.SamplingPointReferenceId
 
 LEFT JOIN reference_samplingpoint r
     ON s.CountryCode = r.CountryCode
-   AND s.SamplingPointRef = r.SamplingPointRef
+   AND s.SamplingPointReferenceId = r.SamplingPointReferenceId
 
 WHERE
     d.CountryCode IS NOT NULL
     OR
     (
-        r.SamplingPointRef IS NOT NULL
+        r.SamplingPointReferenceId IS NOT NULL
         AND ISNULL(s.AssessmentMethodId, '') <> ISNULL(r.AssessmentMethodId, '')
     );
 

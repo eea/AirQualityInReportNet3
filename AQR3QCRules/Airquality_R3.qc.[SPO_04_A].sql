@@ -25,7 +25,7 @@ CTE_pollutant AS
 (
     SELECT
         PollutantID
-    FROM reference.AirPollutant
+    FROM reference.SamplingPoint
 )
 
 SELECT

@@ -24,9 +24,9 @@ WITH src AS
         ) AS AssessmentMethodId,
 
         NULLIF(
-            LTRIM(RTRIM([SamplingPointRef])),
+            LTRIM(RTRIM([SamplingPointReferenceId])),
             ''
-        ) AS SamplingPointRef
+        ) AS SamplingPointReferenceId
 
     FROM reporting.SamplingPoint
 ),
@@ -40,7 +40,7 @@ duplicates AS
     GROUP BY
         CountryCode,
         AssessmentMethodId
-    HAVING COUNT(DISTINCT SamplingPointRef) > 1
+    HAVING COUNT(DISTINCT SamplingPointReferenceId) > 1
 ),
 
 reference_samplingpoint AS
@@ -48,14 +48,14 @@ reference_samplingpoint AS
     SELECT
         CountryCode,
         AssessmentMethodId,
-        SamplingPointRef
+        SamplingPointReferenceId
     FROM reference.SamplingPoint
 )
 
 SELECT
     s.CountryCode,
     s.AssessmentMethodId,
-    s.SamplingPointRef
+    s.SamplingPointReferenceId
 
 FROM src s
 
@@ -72,7 +72,7 @@ WHERE
     OR
     (
         r.AssessmentMethodId IS NOT NULL
-        AND ISNULL(s.SamplingPointRef, '') <> ISNULL(r.SamplingPointRef, '')
+        AND ISNULL(s.SamplingPointReferenceId, '') <> ISNULL(r.SamplingPointReferenceId, '')
     );
 
 GO

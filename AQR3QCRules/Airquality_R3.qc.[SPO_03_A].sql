@@ -19,9 +19,9 @@ WITH src AS
         ) AS CountryCode,
 
         NULLIF(
-            LTRIM(RTRIM([SamplingPointRef])),
+            LTRIM(RTRIM([SamplingPointReferenceId])),
             ''
-        ) AS SamplingPointRef
+        ) AS SamplingPointReferenceId
 
     FROM reporting.SamplingPoint
 ),
@@ -30,11 +30,11 @@ duplicates AS
 (
     SELECT
         CountryCode,
-        SamplingPointRef
+        SamplingPointReferenceId
     FROM src
     GROUP BY
         CountryCode,
-        SamplingPointRef
+        SamplingPointReferenceId
     HAVING COUNT(*) > 1
 ),
 
@@ -42,30 +42,30 @@ reference_samplingpoint AS
 (
     SELECT
         CountryCode,
-        SamplingPointRef,
+        SamplingPointReferenceId,
         COUNT(*) AS RefCount
     FROM reference.SamplingPoint
     GROUP BY
         CountryCode,
-        SamplingPointRef
+        SamplingPointReferenceId
 )
 
 SELECT
     s.CountryCode,
-    s.SamplingPointRef
+    s.SamplingPointReferenceId
 
 FROM src s
 
 LEFT JOIN duplicates d
     ON s.CountryCode = d.CountryCode
-   AND s.SamplingPointRef = d.SamplingPointRef
+   AND s.SamplingPointReferenceId = d.SamplingPointReferenceId
 
 LEFT JOIN reference_samplingpoint r
     ON s.CountryCode = r.CountryCode
-   AND s.SamplingPointRef = r.SamplingPointRef
+   AND s.SamplingPointReferenceId = r.SamplingPointReferenceId
 
 WHERE
-    s.SamplingPointRef IS NULL
+    s.SamplingPointReferenceId IS NULL
     OR d.CountryCode IS NOT NULL
     OR r.RefCount IS NULL
     OR r.RefCount <> 1;
