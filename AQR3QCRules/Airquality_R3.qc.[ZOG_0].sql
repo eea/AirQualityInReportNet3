@@ -1,51 +1,53 @@
 USE [Airquality_R3]
 GO
 
-/****** Object:  View [qc].[ZOG_0]  Script Date: 27/10/2025  ******/
+/****** Object:  View [qc].[ZOG_0]    Script Date: 26/08/2026 12:39:17 ******/
 SET ANSI_NULLS ON
 GO
 
 SET QUOTED_IDENTIFIER ON
 GO
 
-CREATE VIEW [qc].[ZOG_0] AS
 
--- Creation date: 27 November 2025
+CREATE   VIEW [qc].[ZOG_0]
+AS
 -- QC rule code: ZOG_0
--- QC rule name: ZOG_0 Status - [PK]
+-- QC rule name: Status - [PK]
 
-
-WITH cte_submitted AS (
-  SELECT
-    -- record_id,
-    NULLIF(CountryCode, '') AS CountryCode,
-    NULLIF(ZoneId, '') AS ZoneId
-
-  FROM reporting.ZoneGeometry
+WITH cte_submitted AS
+(
+    SELECT
+        NULLIF([CountryCode], '') AS [CountryCode],
+        NULLIF([ZoneId], '') AS [ZoneId]
+    FROM reporting.[ZoneGeometry]
 ),
-
-cte_reference AS (
-  SELECT
-    CountryCode,
-    ZoneId,
-    Deletion
-
-  FROM reference.ZoneGeometry
+cte_reference AS
+(
+    SELECT
+        [CountryCode],
+        [ZoneId],
+        [Deletion]
+    FROM reference.[ZoneGeometry]
 )
-
 SELECT
-  -- s.record_id,
-  s.CountryCode,
-  s.ZoneId,
-  CASE
-    WHEN r.CountryCode IS NULL THEN 'Addition of new record'
-    WHEN COALESCE(r.Deletion, '') <> '' THEN 'Modification of existing record'
-    ELSE 'No modification'
-  END AS record_status
+    s.[CountryCode],
+    s.[ZoneId],
+    CASE
+        -- The submitted record does not exist in the reference dataset.
+        WHEN r.[CountryCode] IS NULL
+            THEN 'Addition of new record'
 
-FROM cte_submitted s
-LEFT JOIN cte_reference r
-  ON s.CountryCode = r.CountryCode
- AND s.ZoneId = r.ZoneId
+        -- The matching reference record is marked as deleted.
+        WHEN r.[Deletion] = 1
+            THEN 'Modification of existing record'
 
+        -- The matching reference record exists and is not marked as deleted.
+        ELSE 'No modification'
+    END AS [record_status]
+FROM cte_submitted AS s
+LEFT JOIN cte_reference AS r
+    ON s.[CountryCode] = r.[CountryCode]
+   AND s.[ZoneId] = r.[ZoneId];
 GO
+
+
