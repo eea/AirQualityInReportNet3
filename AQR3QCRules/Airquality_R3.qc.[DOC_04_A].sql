@@ -11,6 +11,9 @@ GO
 
 CREATE VIEW [qc].[DOC_04_A]
 AS
+
+-- **********************¡¡¡¡¡¡¡¡¡¡¡¡¡ ERROR (not a BLOCKER).!!!!!!!!!!!!!!!!!**********************************
+
 -- QC rule code: DOC_04_A
 -- QC rule name: Uniqueness validation - [DocumentId]
 --
