@@ -13,6 +13,7 @@ CREATE OR ALTER VIEW [qc].[ARZ_04_A] AS
 -- Creation date: 31/08/2026
 -- QC rule code: ARZ_04_A
 -- QC rule name: ARZ_04_A ZoneNationalCode
+-- Severity: ERROR (not BLOCKER)
 
 WITH CTE_assessmentRegimeZone AS (
   SELECT 
