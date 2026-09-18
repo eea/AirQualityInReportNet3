@@ -12,26 +12,23 @@ CREATE OR ALTER VIEW [qc].[ARZ_17_A] AS
 -- QC rule code: ARZ_17_A
 -- QC rule name: ARZ_17_A
 
-WITH CTE_assesmentRegineZone AS (
-  SELECT 
-    /*record_id,*/ 
-    [CountryCode],
-    [AssessmentRegimeId],
-    [ZoneResidentPopulation]
+WITH CTE_assessmentRegimeZone AS (
+    SELECT
+        [CountryCode],
+        [AssessmentRegimeId],
+        [ZoneResidentPopulation]
 
-  FROM [reporting].[AssessmentRegimeZone]
-
+    FROM [reporting].[AssessmentRegimeZone]
 )
 
-SELECT 
-	/*record_id,*/ 
+SELECT
     [CountryCode],
     [AssessmentRegimeId],
     [ZoneResidentPopulation]
 
-FROM CTE_assesmentRegineZone
+FROM CTE_assessmentRegimeZone
 
-WHERE ISNUMERIC(ZoneResidentPopulation) = 1
-	AND [ZoneResidentPopulation] > 0 
+WHERE TRY_CONVERT(decimal(38, 10), [ZoneResidentPopulation]) IS NULL
+   OR TRY_CONVERT(decimal(38, 10), [ZoneResidentPopulation]) <= 0
 
 GO

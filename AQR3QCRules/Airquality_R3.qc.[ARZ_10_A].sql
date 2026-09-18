@@ -47,8 +47,6 @@ CTE_valid_AssessmentZones_types AS
     FROM [qctesting].[Vocabulary]
     WHERE [vocabulary] = 'protectiontarget'
       AND [Status] = 'Valid'
-      AND [URI] IS NOT NULL
-      AND CHARINDEX('/', [URI]) > 0
 )
 SELECT DISTINCT
     d.[CountryCode],

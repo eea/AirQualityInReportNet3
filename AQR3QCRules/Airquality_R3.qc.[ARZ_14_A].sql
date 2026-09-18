@@ -12,27 +12,25 @@ CREATE OR ALTER VIEW [qc].[ARZ_14_A] AS
 -- QC rule code: ARZ_14_A
 -- QC rule name: ARZ_14_A
 
-WITH CTE_assesmentRegineZone AS (
-  SELECT 
-    /*record_id,*/ 
-    [CountryCode],
-    [AssessmentRegimeId],
-    [PostponementYear]
-
-  FROM [reporting].[AssessmentRegimeZone]
-
+WITH CTE_assessmentRegimeZone AS (
+    SELECT
+        [CountryCode],
+        [AssessmentRegimeId],
+        [PostponementYear]
+    FROM [reporting].[AssessmentRegimeZone]
 )
 
-SELECT 
-	/*record_id,*/ 
+SELECT
     [CountryCode],
     [AssessmentRegimeId],
     [PostponementYear]
 
-FROM CTE_assesmentRegineZone
+FROM CTE_assessmentRegimeZone
 
-WHERE ISNUMERIC(PostponementYear) = 1
-	AND LEN(PostponementYear) = 4 
-	AND [PostponementYear] >= 2026
+WHERE [PostponementYear] IS NOT NULL
+  AND (
+        [PostponementYear] NOT LIKE '[0-9][0-9][0-9][0-9]'
+        OR TRY_CONVERT(int, [PostponementYear]) < 2026
+      )
 
 GO

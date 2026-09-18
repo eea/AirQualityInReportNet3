@@ -12,27 +12,25 @@ CREATE OR ALTER VIEW [qc].[ARZ_18_A] AS
 -- QC rule code: ARZ_18_A
 -- QC rule name: ARZ_18_A
 
-WITH CTE_assesmentRegineZone AS (
-  SELECT 
-    /*record_id,*/ 
-    [CountryCode],
-    [AssessmentRegimeId],
-    [ClassificationYear]
+WITH CTE_assessmentRegimeZone AS (
+    SELECT
+        [CountryCode],
+        [AssessmentRegimeId],
+        [ClassificationYear],
+        [ReportingYear]
 
-  FROM [reporting].[AssessmentRegimeZone]
-
+    FROM [reporting].[AssessmentRegimeZone]
 )
 
-SELECT 
-	/*record_id,*/ 
+SELECT
     [CountryCode],
     [AssessmentRegimeId],
     [ClassificationYear]
 
-FROM CTE_assesmentRegineZone
+FROM CTE_assessmentRegimeZone
 
-WHERE ISNUMERIC(ClassificationYear) = 1
-	AND LEN(ClassificationYear) = 4 
-	AND [ClassificationYear] > YEAR(GETDATE()) - 5
+WHERE [ClassificationYear] IS NULL
+   OR [ClassificationYear] NOT LIKE '[0-9][0-9][0-9][0-9]'
+   OR TRY_CONVERT(int, [ClassificationYear]) < TRY_CONVERT(int, [ReportingYear]) - 5
 
 GO
