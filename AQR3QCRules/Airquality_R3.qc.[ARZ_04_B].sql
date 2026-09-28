@@ -11,6 +11,7 @@ CREATE OR ALTER VIEW [qc].[ARZ_04_B] AS
 -- Creation date: 18/09/2026
 -- QC rule code: ARZ_04_B
 -- QC rule name: ARZ_04_B
+-- Severity: WARNING
 
 WITH CTE_reporting AS (
     SELECT
