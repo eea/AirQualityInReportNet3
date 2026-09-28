@@ -7,7 +7,7 @@ GO
 SET QUOTED_IDENTIFIER ON
 GO
 
-CREATE VIEW [qc].[ARZ_08_A] AS
+CREATE OR ALTER VIEW [qc].[ARZ_08_A] AS
 
 -- Creation date: 31/08/2026
 -- QC rule code: ARZ__08_A

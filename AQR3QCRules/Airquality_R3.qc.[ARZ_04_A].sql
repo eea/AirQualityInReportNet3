@@ -1,7 +1,7 @@
 USE [Airquality_R3]
 GO
 
-/****** Object:  View [qctesting].[ARZ_04_A]    Script Date: 31/08/2026 11:05:06 ******/
+/****** Object:  View [qc].[ARZ_04_A]    Script Date: 31/08/2026 11:05:06 ******/
 SET ANSI_NULLS ON
 GO
 

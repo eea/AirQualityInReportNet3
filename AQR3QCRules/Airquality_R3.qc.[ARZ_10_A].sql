@@ -29,24 +29,24 @@ CTE_valid_AssessmentZones_types AS
     SELECT DISTINCT
         LOWER(LTRIM(RTRIM([Notation]))) COLLATE Latin1_General_CI_AS
             AS [ProtectionTargetConcept]
-    FROM [qctesting].[Vocabulary]
+    FROM [reference].[Vocabulary]
     WHERE [vocabulary] = 'protectiontarget'
       AND [Status] = 'Valid'
       AND NULLIF(LTRIM(RTRIM([Notation])), '') IS NOT NULL
 
-    UNION
+    -- UNION
 
-    SELECT DISTINCT
-        LOWER(
-            RIGHT(
-                [URI],
-                CHARINDEX('/', REVERSE([URI])) - 1
-            )
-        ) COLLATE Latin1_General_CI_AS
-            AS [ProtectionTargetConcept]
-    FROM [qctesting].[Vocabulary]
-    WHERE [vocabulary] = 'protectiontarget'
-      AND [Status] = 'Valid'
+    -- SELECT DISTINCT
+    --     LOWER(
+    --         RIGHT(
+    --             [URI],
+    --             CHARINDEX('/', REVERSE([URI])) - 1
+    --         )
+    --     ) COLLATE Latin1_General_CI_AS
+    --         AS [ProtectionTargetConcept]
+    -- FROM [reference].[Vocabulary]
+    -- WHERE [vocabulary] = 'protectiontarget'
+    --   AND [Status] = 'Valid'
 )
 SELECT DISTINCT
     d.[CountryCode],

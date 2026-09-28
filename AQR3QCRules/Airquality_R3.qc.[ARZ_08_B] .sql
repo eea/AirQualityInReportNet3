@@ -14,6 +14,7 @@ CREATE OR ALTER   VIEW [qc].[ARZ_08_B] AS
 -- Creation date: 09/09/2026
 -- QC rule code: ARZ_08_B
 -- QC rule name: ARZ_08_B ZoneName
+-- Severity: WARNING (not BLOCKER)
 
 WITH CTE_assessmentRegimeZone AS (
     SELECT

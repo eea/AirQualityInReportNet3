@@ -9,7 +9,7 @@ SET QUOTED_IDENTIFIER ON
 GO
 
 
-CREATE VIEW [qc].[ARZ_01_A]
+CREATE OR ALTER VIEW [qc].[ARZ_01_A]
 AS
 -- QC rule code: ARZ_01_A
 -- QC rule name: Vocabulary validation - [CountryCode]
