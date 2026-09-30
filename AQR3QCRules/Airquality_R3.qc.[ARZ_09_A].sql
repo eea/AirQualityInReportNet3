@@ -23,8 +23,9 @@ WITH CTE_assesmentRegineZone AS
 ),
 CTE_valid_AssessmentZones_types AS
 (
-    SELECT DISTINCT
-        LOWER(LTRIM(RTRIM([Notation]))) COLLATE Latin1_General_CI_AS
+    SELECT DISTINCT 
+    CAST(REPLACE( 
+            LOWER(LTRIM(RTRIM([URI]))), 'http://dd.eionet.europa.eu/vocabulary/aq/pollutant/', '' ) AS INTEGER )
             AS [ZoneTypeConcept]
     FROM [reference].[Vocabulary]
     WHERE [vocabulary] = 'pollutant'
@@ -58,8 +59,7 @@ SELECT DISTINCT
     END AS [QC_FailureReason]
 FROM CTE_assesmentRegineZone AS d
 LEFT JOIN CTE_valid_AssessmentZones_types AS v
-    ON LOWER(d.[PollutantId]) COLLATE Latin1_General_CI_AS
-     = v.[ZoneTypeConcept]
+    ON TRY_CONVERT(INTEGER, d.[PollutantId]) = v.[ZoneTypeConcept]
 WHERE
     d.[PollutantId] IS NULL
     OR v.[ZoneTypeConcept] IS NULL;

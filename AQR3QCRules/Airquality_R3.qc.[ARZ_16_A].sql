@@ -18,7 +18,7 @@ WITH CTE_assessmentRegimeZone AS (
         [AssessmentRegimeId],
         [ZoneResidentPopulationYear],
         [ReportingYear]
-    FROM [reporting].[AssessmentRegimeZone]
+    FROM [reference].[AssessmentRegimeZone]
 )
 
 SELECT

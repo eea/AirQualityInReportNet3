@@ -1,15 +1,12 @@
 USE [Airquality_R3]
 GO
 
-/****** Object:  View [qc].[ARZ_17_B]    Script Date: 18/09/2026 09:56:55 ******/
 SET ANSI_NULLS ON
 GO
-
 SET QUOTED_IDENTIFIER ON
 GO
 
-
-CREATE OR ALTER   VIEW [qc].[ARZ_17_B] AS
+CREATE OR ALTER VIEW [qc].[ARZ_17_B] AS
 
 -- Creation date: 09/09/2026
 -- QC rule code: ARZ_17_B
@@ -20,41 +17,44 @@ WITH CTE_assessmentRegimeZone AS (
         [CountryCode],
         [PollutantId],
         [ProtectionTarget],
+        [ObjectiveType],
+        [ReportingYear],
         SUM([ZoneResidentPopulation]) AS [TotalZoneResidentPopulation]
     FROM [reporting].[AssessmentRegimeZone]
     GROUP BY
         [CountryCode],
         [PollutantId],
-        [ProtectionTarget]
+        [ProtectionTarget],
+        [ObjectiveType],
+        [ReportingYear]
 ),
 
-CTE_expected_combinations AS (
+CTE_countryPopulation AS (
     SELECT
         [CountryCode],
-        [PollutantId],
-        [ProtectionTarget],
-        [ZoneResidentPopulation]
-    FROM [reference].[AssessmentRegimeZone]
-    -- FROM [reference].[AssessmentRegimeZone]
+        [Year],
+        [Population]
+    FROM [reference].[CountryAreaPopulation]
 )
 
 SELECT
     ARZ.[CountryCode],
     ARZ.[PollutantId],
     ARZ.[ProtectionTarget],
+    ARZ.[ObjectiveType],
+    ARZ.[ReportingYear],
     ARZ.[TotalZoneResidentPopulation],
-    EXP.[ZoneResidentPopulation]
+    REF.[Population] AS [ExpectedPopulation]
 
-FROM CTE_assessmentRegimeZone ARZ
+FROM CTE_assessmentRegimeZone AS ARZ
 
-INNER JOIN CTE_expected_combinations EXP
-    ON  ARZ.[CountryCode] = EXP.[CountryCode]
-    AND ARZ.[PollutantId] = EXP.[PollutantId]
-    AND ARZ.[ProtectionTarget] = EXP.[ProtectionTarget]
+INNER JOIN CTE_countryPopulation AS REF
+    ON ARZ.[CountryCode] = REF.[CountryCode]
+    AND ARZ.[ReportingYear] = REF.[Year]
 
 WHERE
-    ARZ.[TotalZoneResidentPopulation] < EXP.[ZoneResidentPopulation] * 0.95
+    ARZ.[TotalZoneResidentPopulation] < REF.[Population] * 0.95
     OR
-    ARZ.[TotalZoneResidentPopulation] > EXP.[ZoneResidentPopulation] * 1.05
+    ARZ.[TotalZoneResidentPopulation] > REF.[Population] * 1.05
 
 GO

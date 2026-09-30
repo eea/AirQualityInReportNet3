@@ -28,7 +28,7 @@ SELECT
 
 FROM CTE_assessmentRegimeZone
 
-WHERE TRY_CONVERT(decimal(38, 10), [ZoneResidentPopulation]) IS NULL
-   OR TRY_CONVERT(decimal(38, 10), [ZoneResidentPopulation]) <= 0
+WHERE TRY_CONVERT(bigint, [ZoneResidentPopulation]) IS NULL 
+    OR TRY_CONVERT(bigint, [ZoneResidentPopulation]) <= 0
 
 GO
