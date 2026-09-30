@@ -1,70 +1,92 @@
-USE [Airquality_R3]
+USE [Airquality_R3];
 GO
 
-/****** Object:  View [qc].[ZOG_02_B]    Script Date: 25/08/2026 12:20:03 ******/
-SET ANSI_NULLS ON
-GO
+/* ============================================================
+   ZOG_02_B
 
-SET QUOTED_IDENTIFIER ON
-GO
+   Returns records from reporting.ZoneGeometry whose ZoneId does
+   NOT follow the recommended naming convention:
 
+       ZON{separator}{CountryCode}[optional suffix]
 
+   Allowed separators: '.', '_' or '-'.
 
-CREATE VIEW [qc].[ZOG_02_B] AS 
--- Return zone records that DO NOT comply with the exact naming convention: ZON{sep}{CC} 
--- where: --   - prefix is exactly 'ZON' (case-sensitive), 
---   - separator is exactly one of '.', '_' or '-', --   - country code (CC) is exactly two uppercase letters, 
---   - CC must exist in reference.Vocabulary (vocabulary = 'countries'). 
--- Also treat NULL, empty, or values with leading/trailing spaces as invalid. 
-WITH CTE_zone AS ( SELECT 
--- keep raw value to detect leading/trailing spaces 
-[ZoneId] AS [ZoneIdRaw],
--- normalized (trimmed) ZoneId; empty string becomes NULL
-    NULLIF(LTRIM(RTRIM([ZoneId])) COLLATE DATABASE_DEFAULT, '') AS [ZoneId],
+   Valid examples for CountryCode = ES:
+       ZON_ES
+       ZON-ES
+       ZON.ES
+       ZON_ES0835
+   ============================================================ */
+CREATE OR ALTER VIEW [qc].[ZOG_02_B]
+AS
+WITH CTE_Zone AS
+(
+    SELECT
+        /* Keep the original value to identify leading/trailing spaces. */
+        zg.ZoneId AS ZoneIdRaw,
 
-    -- normalized (trimmed) CountryCode from source table (preserve original column selection)
-    NULLIF(LTRIM(RTRIM([CountryCode])) COLLATE DATABASE_DEFAULT, '') AS [CountryCode],
+        /* Trim ZoneId; convert an empty value to NULL. */
+        NULLIF(LTRIM(RTRIM(zg.ZoneId)), '') AS ZoneId,
 
-    -- flag if original value contained leading/trailing spaces (or differs after trimming)
-    CASE
-        WHEN [ZoneId] IS NULL THEN 1
-        WHEN LTRIM(RTRIM([ZoneId])) <> [ZoneId] THEN 1
-        ELSE 0
-    END AS [HasLeadingOrTrailingSpaces]
-FROM [reporting].[ZoneGeometry]
-), CTE_countries AS ( 
--- use reference.Vocabulary as canonical ISO 3166-1 alpha-2 source (uppercased) 
-SELECT DISTINCT UPPER(LTRIM(RTRIM([Notation])) COLLATE DATABASE_DEFAULT) AS [CountryCode] 
-FROM [reference].[Vocabulary] 
-WHERE [vocabulary] COLLATE DATABASE_DEFAULT = 'countries' AND NULLIF(LTRIM(RTRIM([Notation])) COLLATE DATABASE_DEFAULT, '') IS NOT NULL ) 
-SELECT z.[ZoneId], z.[CountryCode] FROM CTE_zone AS z WHERE 
--- 1) NULL or empty after t[qc].[STA_PK]rimming -> invalid 
-z.[ZoneIdRaw] IS NULL OR z.[ZoneId] IS NULL
--- 2) leading/trailing spaces detected -> invalid
-OR z.[HasLeadingOrTrailingSpaces] = 1
+        /* Trim CountryCode; convert an empty value to NULL. */
+        NULLIF(LTRIM(RTRIM(zg.CountryCode)), '') AS CountryCode,
 
--- 3) otherwise require exact valid format; if not valid, return the row
-OR NOT (
-    -- must be exactly length 6: 'Z' 'O' 'N' sep C C  (3 + 1 + 2 = 6)
-    LEN(z.[ZoneId]) = 6
+        /* Identify ZoneId values with leading or trailing spaces. */
+        CASE
+            WHEN zg.ZoneId IS NULL THEN 0
+            WHEN zg.ZoneId <> LTRIM(RTRIM(zg.ZoneId)) THEN 1
+            ELSE 0
+        END AS HasLeadingOrTrailingSpaces
+    FROM [reporting].[ZoneGeometry] AS zg
+),
+CTE_Countries AS
+(
+    /* Use the reference vocabulary as the canonical ISO country-code source. */
+    SELECT DISTINCT
+        UPPER(LTRIM(RTRIM(v.Notation))) AS CountryCode
+    FROM [reference].[Vocabulary] AS v
+    WHERE v.Vocabulary = 'countries'
+      AND NULLIF(LTRIM(RTRIM(v.Notation)), '') IS NOT NULL
+)
+SELECT
+    z.ZoneId,
+    z.CountryCode
+FROM CTE_Zone AS z
+WHERE
+    /* ZoneId is missing, empty, or has leading/trailing spaces. */
+    z.ZoneIdRaw IS NULL
+    OR z.ZoneId IS NULL
+    OR z.HasLeadingOrTrailingSpaces = 1
 
-    -- enforce case-sensitivity for prefix and country letters using a binary collation
-    AND LEFT(z.[ZoneId] COLLATE Latin1_General_BIN2, 3) = 'ZON'
+    /* CountryCode is missing. */
+    OR z.CountryCode IS NULL
 
-    -- separator must be exactly one of '.', '_' or '-'
-    AND SUBSTRING(z.[ZoneId], 4, 1) IN ('.', '_', '-')
-
-    -- country code portion must be two uppercase A-Z letters (binary, case-sensitive)
-    AND SUBSTRING(z.[ZoneId] COLLATE Latin1_General_BIN2, 5, 2) LIKE '[A-Z][A-Z]'
-
-    -- country code must exist in the reference country list (compare using binary collation)
-    AND EXISTS (
+    /* CountryCode does not exist in the reference vocabulary. */
+    OR NOT EXISTS
+    (
         SELECT 1
-        FROM CTE_countries AS c
-        WHERE c.[CountryCode] COLLATE Latin1_General_BIN2 =
-              SUBSTRING(z.[ZoneId] COLLATE Latin1_General_BIN2, 5, 2)
+        FROM CTE_Countries AS c
+        WHERE c.CountryCode COLLATE Latin1_General_BIN2 =
+              z.CountryCode COLLATE Latin1_General_BIN2
     )
-);
-GO
 
+    /* ZoneId does not comply with ZON{separator}{CountryCode}[optional suffix]. */
+    OR NOT
+    (
+        /* Minimum length: ZON + separator + CountryCode. */
+        LEN(z.ZoneId) >= 6
 
+        /* Prefix must be exactly ZON and is case-sensitive. */
+        AND LEFT(z.ZoneId COLLATE Latin1_General_BIN2, 3) = 'ZON'
+
+        /* The separator must be '.', '_' or '-'. */
+        AND SUBSTRING(z.ZoneId, 4, 1) IN ('.', '_', '-')
+
+        /* The embedded CountryCode must contain two uppercase letters. */
+        AND SUBSTRING(z.ZoneId COLLATE Latin1_General_BIN2, 5, 2)
+            LIKE '[A-Z][A-Z]'
+
+        /* The embedded CountryCode must match the reported CountryCode. */
+        AND SUBSTRING(z.ZoneId COLLATE Latin1_General_BIN2, 5, 2) =
+            z.CountryCode COLLATE Latin1_General_BIN2
+    );
