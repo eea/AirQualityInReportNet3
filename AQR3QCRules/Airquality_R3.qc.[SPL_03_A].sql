@@ -1,17 +1,20 @@
 USE [Airquality_R3]
 GO
 
-/****** Object:  View [qc].[SPL_03_A] ******/
 SET ANSI_NULLS ON
 GO
 
 SET QUOTED_IDENTIFIER ON
 GO
 
-CREATE VIEW [qctesting].[SPL_03_A_TEST]
+CREATE OR ALTER VIEW [qc].[SPL_03_A]
 AS
 
-WITH src AS
+-- Creation date: 02/08/2026
+-- QC rule code: SPL_03_A
+-- QC rule name: SPL_03_A LocationBegin
+
+WITH CTE_samplingPointLocation AS
 (
     SELECT
         [CountryCode],
@@ -20,11 +23,14 @@ WITH src AS
 
         TRY_CONVERT(
             datetimeoffset(0),
-            NULLIF(LTRIM(RTRIM(CONVERT(nvarchar(50), [LocationBegin]))), ''),
+            NULLIF(
+                LTRIM(RTRIM(CONVERT(nvarchar(50), [LocationBegin]))),
+                ''
+            ),
             126
-        ) AS LocationBegin_dt
+        ) AS [LocationBegin_dt]
 
-    FROM reporting.SamplingPointLocation
+    FROM [reporting].[SamplingPointLocation]
 )
 
 SELECT
@@ -32,11 +38,11 @@ SELECT
     [AssessmentMethodId],
     [LocationBegin]
 
-FROM src
+FROM CTE_samplingPointLocation
 
 WHERE
-    LocationBegin IS NOT NULL
-    AND LTRIM(RTRIM(CONVERT(nvarchar(50), LocationBegin))) <> ''
-    AND LocationBegin_dt IS NULL;
+    [LocationBegin] IS NULL
+    OR LTRIM(RTRIM(CONVERT(nvarchar(50), [LocationBegin]))) = ''
+    OR [LocationBegin_dt] IS NULL
 
 GO

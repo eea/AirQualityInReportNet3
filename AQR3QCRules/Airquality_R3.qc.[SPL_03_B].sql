@@ -1,17 +1,20 @@
 USE [Airquality_R3]
 GO
 
-/****** Object:  View [qc].[SPL_03_B] ******/
 SET ANSI_NULLS ON
 GO
 
 SET QUOTED_IDENTIFIER ON
 GO
 
-CREATE VIEW [qctesting].[SPL_03_B_TEST]
+CREATE OR ALTER VIEW [qc].[SPL_03_B]
 AS
 
-WITH src AS
+-- Creation date: 02/08/2026
+-- QC rule code: SPL_03_B
+-- QC rule name: SPL_03_B LocationBegin / LocationEnd
+
+WITH CTE_samplingPointLocation AS
 (
     SELECT
         [CountryCode],
@@ -21,17 +24,23 @@ WITH src AS
 
         TRY_CONVERT(
             datetimeoffset(0),
-            NULLIF(LTRIM(RTRIM(CONVERT(nvarchar(50), [LocationBegin]))), ''),
+            NULLIF(
+                LTRIM(RTRIM(CONVERT(nvarchar(50), [LocationBegin]))),
+                ''
+            ),
             126
-        ) AS Begin_dt,
+        ) AS [LocationBegin_dt],
 
         TRY_CONVERT(
             datetimeoffset(0),
-            NULLIF(LTRIM(RTRIM(CONVERT(nvarchar(50), [LocationEnd]))), ''),
+            NULLIF(
+                LTRIM(RTRIM(CONVERT(nvarchar(50), [LocationEnd]))),
+                ''
+            ),
             126
-        ) AS End_dt
+        ) AS [LocationEnd_dt]
 
-    FROM reporting.SamplingPointLocation
+    FROM [reporting].[SamplingPointLocation]
 )
 
 SELECT
@@ -40,12 +49,11 @@ SELECT
     [LocationBegin],
     [LocationEnd]
 
-FROM src
+FROM CTE_samplingPointLocation
 
 WHERE
-    End_dt IS NOT NULL
-    AND Begin_dt IS NOT NULL
-    AND Begin_dt > End_dt;
-
+    [LocationEnd_dt] IS NOT NULL
+    AND [LocationBegin_dt] IS NOT NULL
+    AND [LocationBegin_dt] > [LocationEnd_dt]
 
 GO

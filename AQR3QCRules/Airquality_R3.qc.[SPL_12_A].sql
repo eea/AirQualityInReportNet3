@@ -1,18 +1,20 @@
 USE [Airquality_R3]
 GO
 
-/****** Object:  View [qc].[SPL_12_A] ******/
 SET ANSI_NULLS ON
 GO
 
 SET QUOTED_IDENTIFIER ON
 GO
 
+CREATE OR ALTER VIEW [qc].[SPL_12_A]
+AS
 
-CREATE OR ALTER VIEW [qctesting].[SPL_12_A_TEST] AS
+-- Creation date: 02/08/2026
+-- QC rule code: SPL_12_A
+-- QC rule name: InletHeight
 
-
-WITH src AS
+WITH CTE_samplingPointLocation AS
 (
     SELECT
         [CountryCode],
@@ -22,14 +24,17 @@ WITH src AS
         NULLIF(
             LTRIM(RTRIM(CONVERT(nvarchar(50), [InletHeight]))),
             ''
-        ) AS InletHeight_str,
+        ) AS [InletHeight_str],
 
         TRY_CONVERT(
-            decimal(9,6),
-            NULLIF(LTRIM(RTRIM(CONVERT(nvarchar(50), [InletHeight]))), '')
-        ) AS InletHeight_num
+            decimal(18, 6),
+            NULLIF(
+                LTRIM(RTRIM(CONVERT(nvarchar(50), [InletHeight]))),
+                ''
+            )
+        ) AS [InletHeight_num]
 
-    FROM reporting.SamplingPointLocation
+    FROM [reporting].[SamplingPointLocation]
 )
 
 SELECT
@@ -37,15 +42,12 @@ SELECT
     [AssessmentMethodId],
     [InletHeight]
 
-FROM src
+FROM CTE_samplingPointLocation
 
 WHERE
-    InletHeight_str IS NOT NULL
-    AND
-    (
-        InletHeight_num IS NULL
-        OR InletHeight_num <= 0
-        OR InletHeight_num >= 30
-    );
+       [InletHeight_str] IS NULL
+    OR [InletHeight_num] IS NULL
+    OR [InletHeight_num] < 0
+    OR [InletHeight_num] > 30;
 
 GO

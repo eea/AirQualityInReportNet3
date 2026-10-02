@@ -1,82 +1,137 @@
 USE [Airquality_R3]
 GO
 
-/****** Object:  View [qc].[SPL_04_B]  ******/
+/****** Object:  View [qc].[SPL_04_B] ******/
 SET ANSI_NULLS ON
 GO
 
 SET QUOTED_IDENTIFIER ON
 GO
 
-CREATE VIEW [qctesting].[SPL_04_B_TEST]
+CREATE OR ALTER VIEW [qc].[SPL_04_B]
 AS
 
-WITH latest_location AS
-(
+-- Creation date: 02/08/2026
+-- QC rule code: SPL_04_B
+-- QC rule name: LocationEnd / ProcessActivityEnd
+
+WITH CTE_location AS (
     SELECT
-        CountryCode,
-        AssessmentMethodId,
-        LocationBegin,
-        LocationEnd,
+        [CountryCode],
+        [AssessmentMethodId],
+        [LocationBegin],
+        [LocationEnd],
 
-        ROW_NUMBER() OVER
-        (
-            PARTITION BY CountryCode, AssessmentMethodId
-            ORDER BY TRY_CONVERT(datetimeoffset(0), LocationBegin,126) DESC
-        ) AS rn
+        TRY_CONVERT(
+            datetimeoffset(0),
+            NULLIF(
+                LTRIM(RTRIM(CONVERT(nvarchar(50), [LocationBegin]))),
+                ''
+            ),
+            126
+        ) AS LocationBegin_dt,
 
-    FROM reporting.SamplingPointLocation
+        TRY_CONVERT(
+            datetimeoffset(0),
+            NULLIF(
+                LTRIM(RTRIM(CONVERT(nvarchar(50), [LocationEnd]))),
+                ''
+            ),
+            126
+        ) AS LocationEnd_dt
+
+    FROM [reporting].[SamplingPointLocation]
 ),
 
-latest_process AS
-(
+CTE_latest_location AS (
     SELECT
-        CountryCode,
-        AssessmentMethodId,
-        ProcessActivityBegin,
-        ProcessActivityEnd,
+        [CountryCode],
+        [AssessmentMethodId],
+        [LocationBegin],
+        [LocationEnd],
+        [LocationBegin_dt],
+        [LocationEnd_dt],
 
-        ROW_NUMBER() OVER
-        (
-            PARTITION BY CountryCode, AssessmentMethodId
-            ORDER BY TRY_CONVERT(datetimeoffset(0), ProcessActivityBegin,126) DESC
+        ROW_NUMBER() OVER (
+            PARTITION BY [CountryCode], [AssessmentMethodId]
+            ORDER BY [LocationBegin_dt] DESC
         ) AS rn
 
-    FROM reporting.SamplingProcess
+    FROM CTE_location
+),
+
+CTE_process AS (
+    SELECT
+        [CountryCode],
+        [AssessmentMethodId],
+        [ProcessActivityBegin],
+        [ProcessActivityEnd],
+
+        TRY_CONVERT(
+            datetimeoffset(0),
+            NULLIF(
+                LTRIM(RTRIM(CONVERT(nvarchar(50), [ProcessActivityBegin]))),
+                ''
+            ),
+            126
+        ) AS ProcessActivityBegin_dt,
+
+        TRY_CONVERT(
+            datetimeoffset(0),
+            NULLIF(
+                LTRIM(RTRIM(CONVERT(nvarchar(50), [ProcessActivityEnd]))),
+                ''
+            ),
+            126
+        ) AS ProcessActivityEnd_dt
+
+    FROM [reporting].[SamplingProcess]
+),
+
+CTE_latest_process AS (
+    SELECT
+        [CountryCode],
+        [AssessmentMethodId],
+        [ProcessActivityBegin],
+        [ProcessActivityEnd],
+        [ProcessActivityBegin_dt],
+        [ProcessActivityEnd_dt],
+
+        ROW_NUMBER() OVER (
+            PARTITION BY [CountryCode], [AssessmentMethodId]
+            ORDER BY [ProcessActivityBegin_dt] DESC
+        ) AS rn
+
+    FROM CTE_process
 )
 
 SELECT
+    L.[CountryCode],
+    L.[AssessmentMethodId],
+    L.[LocationBegin],
+    L.[LocationEnd],
+    P.[ProcessActivityBegin],
+    P.[ProcessActivityEnd]
 
-    l.CountryCode,
-    l.AssessmentMethodId,
+FROM CTE_latest_location L
 
-    l.LocationBegin,
-    l.LocationEnd,
-
-    p.ProcessActivityBegin,
-    p.ProcessActivityEnd
-
-FROM latest_location l
-
-INNER JOIN latest_process p
-
-ON l.CountryCode = p.CountryCode
-AND l.AssessmentMethodId = p.AssessmentMethodId
+INNER JOIN CTE_latest_process P
+    ON L.[CountryCode] = P.[CountryCode]
+    AND L.[AssessmentMethodId] = P.[AssessmentMethodId]
 
 WHERE
+    L.rn = 1
+    AND P.rn = 1
+    AND (
+           (L.[LocationEnd_dt] IS NULL
+            AND P.[ProcessActivityEnd_dt] IS NOT NULL)
 
-l.rn = 1
-AND p.rn = 1
+        OR (L.[LocationEnd_dt] IS NOT NULL
+            AND P.[ProcessActivityEnd_dt] IS NULL)
 
-AND
-(
-ISNULL(
-TRY_CONVERT(datetimeoffset(0),l.LocationEnd,126),
-'19000101'
-)
-<>
-ISNULL(
-TRY_CONVERT(datetimeoffset(0),p.ProcessActivityEnd,126),
-'19000101'
-)
-);
+        OR (L.[LocationEnd_dt] IS NOT NULL
+            AND P.[ProcessActivityEnd_dt] IS NOT NULL
+            AND L.[LocationEnd_dt] <> P.[ProcessActivityEnd_dt])
+    );
+
+GO

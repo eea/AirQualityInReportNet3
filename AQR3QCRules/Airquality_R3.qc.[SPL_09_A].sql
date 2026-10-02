@@ -7,10 +7,14 @@ GO
 SET QUOTED_IDENTIFIER ON
 GO
 
-CREATE OR ALTER VIEW [qctesting].[SPL_09_A_TEST]
+CREATE OR ALTER VIEW [qc].[SPL_09_A]
 AS
 
-WITH src AS
+-- Creation date: 02/08/2026
+-- QC rule code: SPL_09_A
+-- QC rule name: Latitude
+
+WITH CTE_samplingPointLocation AS
 (
     SELECT
         [CountryCode],
@@ -20,14 +24,17 @@ WITH src AS
         NULLIF(
             LTRIM(RTRIM(CONVERT(nvarchar(50), [Latitude]))),
             ''
-        ) AS Latitude_str,
+        ) AS [Latitude_str],
 
         TRY_CONVERT(
-            decimal(18,4),
-            NULLIF(LTRIM(RTRIM(CONVERT(nvarchar(50), [Latitude]))), '')
-        ) AS Latitude_num
+            decimal(18, 10),
+            NULLIF(
+                LTRIM(RTRIM(CONVERT(nvarchar(50), [Latitude]))),
+                ''
+            )
+        ) AS [Latitude_num]
 
-    FROM reporting.SamplingPointLocation
+    FROM [reporting].[SamplingPointLocation]
 )
 
 SELECT
@@ -35,18 +42,26 @@ SELECT
     [AssessmentMethodId],
     [Latitude]
 
-FROM src
+FROM CTE_samplingPointLocation
 
 WHERE
-    Latitude_str IS NOT NULL
-    AND
-    (
-        Latitude_num IS NULL
+       [Latitude_str] IS NULL
 
-        OR Latitude_str NOT LIKE '%.___ _'
+    OR [Latitude_num] IS NULL
 
-        OR Latitude_num < -90
-        OR Latitude_num > 90
-    );
+    OR (
+        CHARINDEX('.', [Latitude_str]) > 0
+        AND LEN(
+            SUBSTRING(
+                [Latitude_str],
+                CHARINDEX('.', [Latitude_str]) + 1,
+                LEN([Latitude_str])
+            )
+        ) > 4
+    )
+
+    OR [Latitude_num] < -90
+
+    OR [Latitude_num] > 90;
 
 GO

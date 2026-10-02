@@ -1,17 +1,21 @@
 USE [Airquality_R3]
 GO
 
-/****** Object:  View [qc].[SPL_04_A]  ******/
+/****** Object:  View [qc].[SPL_04_A] ******/
 SET ANSI_NULLS ON
 GO
 
 SET QUOTED_IDENTIFIER ON
 GO
 
-CREATE VIEW [qctesting].[SPL_04_A_TEST]
+CREATE OR ALTER VIEW [qc].[SPL_04_A]
 AS
 
-WITH src AS (
+-- Creation date: 02/08/2026
+-- QC rule code: SPL_04_A
+-- QC rule name: LocationEnd
+
+WITH CTE_samplingPointLocation AS (
     SELECT
         [CountryCode],
         [AssessmentMethodId],
@@ -20,21 +24,18 @@ WITH src AS (
         NULLIF(
             LTRIM(RTRIM(CONVERT(nvarchar(50), [LocationEnd]))),
             ''
-        ) AS End_str,
+        ) AS LocationEnd_str,
 
         TRY_CONVERT(
             datetimeoffset(0),
-            NULLIF(LTRIM(RTRIM(CONVERT(nvarchar(50), [LocationEnd]))), ''),
+            NULLIF(
+                LTRIM(RTRIM(CONVERT(nvarchar(50), [LocationEnd]))),
+                ''
+            ),
             126
-        ) AS End_as_dto,
+        ) AS LocationEnd_dt
 
-        TRY_CONVERT(
-            datetime2(0),
-            NULLIF(LTRIM(RTRIM(CONVERT(nvarchar(50), [LocationEnd]))), ''),
-            126
-        ) AS End_as_dt2
-
-    FROM reporting.SamplingPointLocation
+    FROM [reporting].[SamplingPointLocation]
 )
 
 SELECT
@@ -42,11 +43,13 @@ SELECT
     [AssessmentMethodId],
     [LocationEnd]
 
-FROM src
+FROM CTE_samplingPointLocation
 
 WHERE
-    End_str IS NOT NULL
-    AND End_as_dto IS NULL
-    AND End_as_dt2 IS NULL;
+       [LocationEnd] IS NOT NULL
+   AND (
+          [LocationEnd_str] IS NULL
+          OR [LocationEnd_dt] IS NULL
+       );
 
 GO

@@ -1,17 +1,21 @@
 USE [Airquality_R3]
 GO
 
-/****** Object:  View [qc].[SPL_03_C] ******/
 SET ANSI_NULLS ON
 GO
 
 SET QUOTED_IDENTIFIER ON
 GO
 
-CREATE VIEW [qctesting].[SPL_03_C_TEST]
+CREATE OR ALTER VIEW [qc].[SPL_03_C]
 AS
 
-WITH src AS (
+-- Creation date: 02/08/2026
+-- QC rule code: SPL_03_C
+-- QC rule name: SPL_03_C LocationBegin / LocationEnd
+
+WITH CTE_samplingPointLocation AS
+(
     SELECT
         [CountryCode],
         [AssessmentMethodId],
@@ -20,82 +24,100 @@ WITH src AS (
 
         TRY_CONVERT(
             datetimeoffset(0),
-            NULLIF(LTRIM(RTRIM(CONVERT(nvarchar(50), [LocationBegin]))), ''),
+            NULLIF(
+                LTRIM(RTRIM(CONVERT(nvarchar(50), [LocationBegin]))),
+                ''
+            ),
             126
-        ) AS Begin_dt,
+        ) AS [LocationBegin_dt],
 
         TRY_CONVERT(
             datetimeoffset(0),
-            NULLIF(LTRIM(RTRIM(CONVERT(nvarchar(50), [LocationEnd]))), ''),
+            NULLIF(
+                LTRIM(RTRIM(CONVERT(nvarchar(50), [LocationEnd]))),
+                ''
+            ),
             126
-        ) AS End_dt
+        ) AS [LocationEnd_dt]
 
-    FROM reporting.SamplingPointLocation
+    FROM [reporting].[SamplingPointLocation]
 ),
 
-ordered AS (
+CTE_ordered AS
+(
     SELECT
-        s.*,
+        S.*,
 
-        MAX(End_dt) OVER (
+        MAX([LocationEnd_dt]) OVER (
             PARTITION BY [CountryCode], [AssessmentMethodId]
-            ORDER BY Begin_dt
+            ORDER BY [LocationBegin_dt]
             ROWS BETWEEN UNBOUNDED PRECEDING AND 1 PRECEDING
-        ) AS LatestPreviousEnd
+        ) AS [LatestPreviousEnd]
 
-    FROM src s
+    FROM CTE_samplingPointLocation AS S
 ),
 
--- A previous LocationBegin has no LocationEnd although a newer LocationBegin exists
-previous_open AS (
-
+CTE_previousOpen AS
+(
     SELECT
-        o.[CountryCode],
-        o.[AssessmentMethodId],
-        o.[LocationBegin],
-        o.[LocationEnd],
-        CAST(NULL AS datetimeoffset(0)) AS LatestPreviousEnd,
-        'Previous LocationBegin has no LocationEnd' AS Violation
+        O.[CountryCode],
+        O.[AssessmentMethodId],
+        O.[LocationBegin],
+        O.[LocationEnd],
+        O.[LatestPreviousEnd],
+        'Previous LocationBegin has no LocationEnd' AS [Violation]
 
-    FROM ordered o
+    FROM CTE_ordered AS O
 
     WHERE
-        o.Begin_dt IS NOT NULL
-        AND o.End_dt IS NULL
+        O.[LocationBegin_dt] IS NOT NULL
+        AND O.[LocationEnd_dt] IS NULL
         AND EXISTS (
             SELECT 1
-            FROM ordered n
-            WHERE n.CountryCode = o.CountryCode
-              AND n.AssessmentMethodId = o.AssessmentMethodId
-              AND n.Begin_dt > o.Begin_dt
+            FROM CTE_ordered AS N
+            WHERE
+                N.[CountryCode] = O.[CountryCode]
+                AND N.[AssessmentMethodId] = O.[AssessmentMethodId]
+                AND N.[LocationBegin_dt] > O.[LocationBegin_dt]
         )
 ),
 
--- The new LocationBegin starts before the latest previous LocationEnd
-invalid_order AS (
-
+CTE_overlappingPeriods AS
+(
     SELECT
-        o.[CountryCode],
-        o.[AssessmentMethodId],
-        o.[LocationBegin],
-        o.[LocationEnd],
-        o.LatestPreviousEnd,
-        'LocationBegin earlier than latest previous LocationEnd' AS Violation
+        O.[CountryCode],
+        O.[AssessmentMethodId],
+        O.[LocationBegin],
+        O.[LocationEnd],
+        O.[LatestPreviousEnd],
+        'LocationBegin earlier than latest previous LocationEnd' AS [Violation]
 
-    FROM ordered o
+    FROM CTE_ordered AS O
 
     WHERE
-        o.Begin_dt IS NOT NULL
-        AND o.LatestPreviousEnd IS NOT NULL
-        AND o.Begin_dt < o.LatestPreviousEnd
+        O.[LocationBegin_dt] IS NOT NULL
+        AND O.[LatestPreviousEnd] IS NOT NULL
+        AND O.[LocationBegin_dt] < O.[LatestPreviousEnd]
 )
 
-SELECT *
-FROM previous_open
+SELECT
+    [CountryCode],
+    [AssessmentMethodId],
+    [LocationBegin],
+    [LocationEnd],
+    [LatestPreviousEnd],
+    [Violation]
+FROM CTE_previousOpen
 
 UNION ALL
 
-SELECT *
-FROM invalid_order;
+SELECT
+    [CountryCode],
+    [AssessmentMethodId],
+    [LocationBegin],
+    [LocationEnd],
+    [LatestPreviousEnd],
+    [Violation]
+FROM CTE_overlappingPeriods
 
 GO

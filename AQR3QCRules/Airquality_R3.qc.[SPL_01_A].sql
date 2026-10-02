@@ -1,35 +1,41 @@
 USE [Airquality_R3]
 GO
 
-/****** Object:  View [qc].[SPL_01_A] ******/
 SET ANSI_NULLS ON
 GO
 
 SET QUOTED_IDENTIFIER ON
 GO
 
-CREATE VIEW [qctesting].SPL_01_A_TEST
- AS
+CREATE OR ALTER VIEW [qc].[SPL_01_A] AS
 
--- Creation date: June 2026
+-- Creation date: 02/08/2026
+-- QC rule code: SPL_01_A
+-- QC rule name: SPL_01_A CountryCode
 
+WITH CTE_countryCode AS (
+    SELECT
+        [CountryCode] AS [CountryCodeRaw],
+        NULLIF(LTRIM(RTRIM([CountryCode])), '') AS [CountryCode]
+    FROM [reporting].[SamplingPointLocation]
+),
 
-WITH CTE_countryCode AS ( 
-SELECT --record_id ,
-NULLIF(LTRIM(RTRIM(countryCode)), '') AS countryCode
-FROM reporting.SamplingPointLocation ) ,
-
-missing_codes AS ( 
-SELECT /*sp.record_id,*/ cc.countryCode 
-FROM CTE_countryCode cc 
-LEFT JOIN reference."vocabulary" v 
-ON cc.countryCode = v."notation" COLLATE Latin1_General_CI_AS 
-AND v."vocabulary" = 'countries'
-WHERE 
-  (v."notation" IS NULL AND cc.countryCode IS NOT NULL) 
-  
+CTE_validCountryCodes AS (
+    SELECT DISTINCT
+        LTRIM(RTRIM(v.[notation])) COLLATE Latin1_General_CI_AS
+            AS [CountryCode]
+    FROM [reference].[Vocabulary] AS v
+    WHERE v.[vocabulary] = 'countries'
+      AND NULLIF(LTRIM(RTRIM(v.[notation])), '') IS NOT NULL
 )
 
-SELECT DISTINCT * FROM missing_codes
+SELECT DISTINCT
+    cc.[CountryCodeRaw] AS [CountryCode]
+FROM CTE_countryCode AS cc
+LEFT JOIN CTE_validCountryCodes AS v
+    ON cc.[CountryCode] COLLATE Latin1_General_CI_AS = v.[CountryCode]
+WHERE
+    cc.[CountryCode] IS NULL
+    OR v.[CountryCode] IS NULL
 
 GO

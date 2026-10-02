@@ -1,16 +1,20 @@
 USE [Airquality_R3]
 GO
 
-/****** Object:  View [qc].[SPL_13_A]     ******/
 SET ANSI_NULLS ON
 GO
 
 SET QUOTED_IDENTIFIER ON
 GO
 
-CREATE OR ALTER VIEW [qctesting].[SPL_13_A_TEST] AS
+CREATE OR ALTER VIEW [qc].[SPL_13_A]
+AS
 
-WITH src AS
+-- Creation date: 02/08/2026
+-- QC rule code: SPL_13_A
+-- QC rule name: BuildingDistance
+
+WITH CTE_samplingPointLocation AS
 (
     SELECT
         [CountryCode],
@@ -20,14 +24,17 @@ WITH src AS
         NULLIF(
             LTRIM(RTRIM(CONVERT(nvarchar(50), [BuildingDistance]))),
             ''
-        ) AS BuildingDistance_str,
+        ) AS [BuildingDistance_str],
 
         TRY_CONVERT(
-            decimal(9,2),
-            NULLIF(LTRIM(RTRIM(CONVERT(nvarchar(50), [BuildingDistance]))), '')
-        ) AS BuildingDistance_num
+            decimal(18, 6),
+            NULLIF(
+                LTRIM(RTRIM(CONVERT(nvarchar(50), [BuildingDistance]))),
+                ''
+            )
+        ) AS [BuildingDistance_num]
 
-    FROM reporting.SamplingPointLocation
+    FROM [reporting].[SamplingPointLocation]
 )
 
 SELECT
@@ -35,15 +42,13 @@ SELECT
     [AssessmentMethodId],
     [BuildingDistance]
 
-FROM src
+FROM CTE_samplingPointLocation
 
 WHERE
-    BuildingDistance_str IS NOT NULL
-    AND
-    (
-        BuildingDistance_num IS NULL
-        OR BuildingDistance_num <= 0
-        OR BuildingDistance_num >= 500
-    );
+       [BuildingDistance_str] IS NOT NULL
+   AND (
+          [BuildingDistance_num] IS NULL
+       OR [BuildingDistance_num] < 0
+   );
 
 GO
