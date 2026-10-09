@@ -1,3 +1,7 @@
+--QC code: SPP_06_B
+--QC name: SPP_06_B Cross-check & Consistency - [AssessmentMethodId] SPO_02 [PollutantId] SPO_04
+--QC rule description: Combination of attribute values SPP_03 and SPP_06 must correspond to the combination of attribute values SPO_02 and SPO_04 in SamplingPoint table in reporting or reference data.
+
 CREATE VIEW [qc].[SPP_06_B] AS
 WITH sp AS (
 SELECT

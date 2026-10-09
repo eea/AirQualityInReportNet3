@@ -1,7 +1,11 @@
 USE [Airquality_R3]
 GO
 
-/****** Object:  View [qc].[[[SPP_07_B]]]    Script Date: 26/06/2026 11:02:00 ******/
+
+-- Creation date: July 2026
+-- QC rule code: SPP.07.B
+-- QC rule name: SPP.07.B Vocabulary - [MeasurementType]
+--QC rule description: Attribute SPP_07 must have length > 0 and < 51.
 SET ANSI_NULLS ON
 GO
 

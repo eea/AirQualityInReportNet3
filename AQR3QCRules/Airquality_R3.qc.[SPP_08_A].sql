@@ -18,6 +18,7 @@ CREATE VIEW [qc].[SPP_08_A] AS
 -- Creation date: 22 October 2025
 -- QC rule code: SPP_08_A
 -- QC rule name: SPP_08_A Vocabulary - [MeasurementMethod]
+-- QC rule description: Method shall be reported using a valid value from the measurementmethod vocabulary.
 -- Modification date: 31 October 2025
 
 

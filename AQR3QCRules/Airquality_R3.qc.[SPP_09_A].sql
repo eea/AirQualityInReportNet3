@@ -19,6 +19,7 @@ CREATE VIEW [qc].[SPP.09.A] AS
 -- Creation date: 23 October 2025
 -- QC rule code: SPP_09_A
 -- QC rule name: SPP_09_A Vocabulary - [equipment]
+-- QC rule description: Method shall be reported using a valid value from the measurementmethod vocabulary.
 -- Modification date: 31 October 2025
 
 

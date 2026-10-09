@@ -1,7 +1,7 @@
 USE [Airquality_R3]
 GO
 
-/****** Object:  View [qc].[SPP_11_A]    Script Date: 29/09/2026 14:12:29 ******/
+/****** Object:  View [qc].[SPP_11_A]    Script Date: 08/10/2026 13:45:16 ******/
 SET ANSI_NULLS ON
 GO
 
@@ -9,22 +9,13 @@ SET QUOTED_IDENTIFIER ON
 GO
 
 
-CREATE   VIEW [qc].[SPP_11_A]
+alter   VIEW [qc].[SPP_11_A]
 AS
 /* ============================================================
    QC rule code: SPP_11_A
-   QC rule name: SamplingProcess EquivalenceDemonstrated validity
-
-   Validation rules:
-   - EquivalenceDemonstrated must be reported.
-   - EquivalenceDemonstrated must not be NULL.
-   - EquivalenceDemonstrated must not be empty or whitespace-only.
-   - The value must match a Notation in the
-     'equivalencedemonstrated' reference vocabulary.
-
-   Collation:
-   - Explicit CI_AS collation prevents conflicts between
-     reporting.SamplingProcess and reference.Vocabulary.
+   QC rule name: SPP_11_A Vocabulary - [EquivalenceDemonstrated]
+   QC rule description: EquivalenceDemonstrated shall be reported using a valid value from the equivalencedemonstrated vocabulary.
+  
    ============================================================ */
 SELECT
     spp.CountryCode,

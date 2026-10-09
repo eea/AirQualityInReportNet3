@@ -7,7 +7,9 @@ GO
 
 SET QUOTED_IDENTIFIER ON
 GO
-
+--QC code: SPP_05_A
+--QC name: SPP_05_A Format – [ProcessActivityEnd]
+--QC rule description: Attribute SPP_05 must follow ISO8601, e.g. '2025-01-01T00:00:00' for UTC/Zulu or '2025-01-01T00:00:00+02:00' for UTC+2
 
 CREATE OR ALTER VIEW [qc].[SPP_05_A] AS
 WITH src AS (

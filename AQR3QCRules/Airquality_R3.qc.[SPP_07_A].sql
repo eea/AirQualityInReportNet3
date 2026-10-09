@@ -14,8 +14,9 @@ GO
 CREATE VIEW [qc].[SPP_07_A] AS
 
 -- Creation date: July 2025
--- QC rule code: SPP_07_A
--- QC rule name: SPP_07_A Vocabulary - [MeasurementType]
+-- QC rule code: SPP.07.A
+-- QC rule name: SPP.07.A Vocabulary - [MeasurementType]
+--QC rule description: MeasurementType shall be reported using a valid value from the measurementtype vocabulary.
 
 WITH CTE_samplingprocess AS ( 
 SELECT --record_id, -- commented in SQL Server, necessary in Reportnet 3

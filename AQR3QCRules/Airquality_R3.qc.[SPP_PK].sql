@@ -9,8 +9,9 @@ GO
 CREATE VIEW [qc].[SPP_PK] AS
 
 -- Creation date: 03 September 2025
--- QC rule code: SPP_PK
--- QC rule name: SPP_PK Constraint - [CountryCode,ProcessId,AssessmentMethodId,ProcessActivityBegin]
+-- QC rule code: SPP.PK
+-- QC rule name: SPP.PK Constraint - [CountryCode,ProcessId,AssessmentMethodId,ProcessActivityBegin]
+-- QC rule description: The values reported under CountryCode, ProcessId, AssessmentMethodId and ProcessActivityBegin cannot be null and the combination must be unique in the SamplingProcess table
 
 WITH CTE_SP AS (
   SELECT 

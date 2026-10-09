@@ -1,43 +1,78 @@
-USE [Airquality_R3]
+USE [Airquality_R3];
 GO
 
-/****** Object:  View [qc].[SPP_01_A]    Script Date: 24/06/2026 13:55:50 ******/
-SET ANSI_NULLS ON
+SET ANSI_NULLS ON;
 GO
 
-SET QUOTED_IDENTIFIER ON
+SET QUOTED_IDENTIFIER ON;
 GO
 
+ALTER VIEW [qc].[SPP_01_A]
+AS
 
+-- Creation date: October 2026
+-- QC rule code: SPP_01_A
+-- QC rule name: SPP.01_A Content check - [CountryCode]
+-- QC rule description: CountryCode must be reported as a valid ISO2 country code corresponding to the reporting country.
 
+WITH CTE_countryCode AS
+(
+    SELECT
+        spp.CountryCode AS CountryCodeRaw,
+        spp.ProcessId,
+        spp.AssessmentMethodId,
+        spp.ProcessActivityBegin,
+        spp.ProcessActivityEnd,
+        spp.PollutantId,
 
-CREATE VIEW [qc].SPP_01_A
- AS
+        NULLIF
+        (
+            LTRIM(RTRIM(spp.CountryCode)),
+            ''
+        ) COLLATE Latin1_General_CI_AS AS CountryCode
+    FROM [reporting].[SamplingProcess] AS spp
+),
+missing_codes AS
+(
+    SELECT
+        cc.CountryCodeRaw,
+        cc.ProcessId,
+        cc.AssessmentMethodId,
+        cc.ProcessActivityBegin,
+        cc.ProcessActivityEnd,
+        cc.PollutantId,
+        cc.CountryCode,
+        CASE
+            WHEN cc.CountryCode IS NULL
+                THEN 'MISSING_OR_EMPTY_COUNTRYCODE'
 
--- Creation date: June 2026
+            WHEN v.Notation IS NULL
+                THEN 'COUNTRYCODE_NOT_IN_COUNTRIES_VOCABULARY'
 
+            /*
+            WHEN cc.CountryCode <> '{%R3_COUNTRY_CODE%}'
+                THEN 'COUNTRYCODE_DOES_NOT_MATCH_REPORTING_COUNTRY'
+            */
+        END AS QC_FailureReason
+    FROM CTE_countryCode AS cc
+    LEFT JOIN [reference].[Vocabulary] AS v
+        ON  cc.CountryCode = v.Notation COLLATE Latin1_General_CI_AS
+        AND v.Vocabulary = 'countries'
+    WHERE
+        cc.CountryCode IS NULL
+        OR v.Notation IS NULL
 
-WITH CTE_countryCode AS ( 
-SELECT --record_id ,
-NULLIF(LTRIM(RTRIM(countryCode)), '') AS countryCode
-FROM reporting.SamplingProcess ) ,
-
-missing_codes AS ( 
-SELECT /*sp.record_id,*/ cc.countryCode 
-FROM CTE_countryCode cc 
-LEFT JOIN reference."vocabulary" v 
-ON cc.countryCode = v."notation" COLLATE Latin1_General_CI_AS AND v."vocabulary" = 'countries'
-WHERE 
-  (v."notation" IS NULL AND cc.countryCode IS NOT NULL) 
-  
+        /*
+        OR cc.CountryCode <> '{%R3_COUNTRY_CODE%}'
+        */
 )
-
-SELECT DISTINCT * FROM missing_codes
-
-
-
-
-
+SELECT
+    CountryCodeRaw AS CountryCode,
+    ProcessId,
+    AssessmentMethodId,
+    ProcessActivityBegin,
+    ProcessActivityEnd,
+    PollutantId,
+    QC_FailureReason
+FROM missing_codes;
 GO
-
-

@@ -1,6 +1,10 @@
 USE [Airquality_R3]
 GO
 
+-- Creation date: October 2026
+-- QC rule code: SPP_02_A
+-- QC rule name: SPP_02_A Content check - [ProcessId]
+-- QC rule description: ProcessId must be reported and shall identify the sampling process or equipment configuration used.
 
 SET ANSI_NULLS ON
 GO

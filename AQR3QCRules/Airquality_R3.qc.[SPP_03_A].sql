@@ -1,13 +1,16 @@
 USE [Airquality_R3]
 GO
 
-/****** Object:  View [qc].[SPP_03_A]    Script Date: 25/06/2026 13:08:50 ******/
+
+
 SET ANSI_NULLS ON
 GO
 
 SET QUOTED_IDENTIFIER ON
 GO
-
+--QC code: SPP_03_A
+--QC name: SPP_03_A Constraint – [AssessmentMethodId]
+--QC rule description: Attribute SPP_03 must have length > 0 and < 51.
 
 CREATE   VIEW [qc].[SPP_03_A] AS
 SELECT

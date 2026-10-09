@@ -12,8 +12,10 @@ GO
 CREATE   VIEW [qc].[SPP_10_A]
 AS
 /* ============================================================
-   QC rule code: SPP_10_A
-   QC rule name: SamplingProcess AnalyticalTechnique validity
+    QC rule code: SPP_10_A
+ QC rule name: SPP_10_A Vocabulary -[AnalyticalTechnique]
+ QC rule description: AnalyticalTechnique shall be reported using a valid value from the analyticaltechnique vocabulary.
+
    ============================================================ */
 SELECT
     spp.CountryCode,

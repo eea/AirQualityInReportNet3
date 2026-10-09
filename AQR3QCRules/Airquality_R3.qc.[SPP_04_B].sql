@@ -1,14 +1,17 @@
 USE [Airquality_R3]
 GO
 
-/****** Object:  View [qctesting].[SPP_04_B]    Script Date: 02/07/2026 13:54:42 ******/
+/****** Object:  View [qc].[SPP_04_B]    Script Date: 07/10/2026 13:06:04 ******/
 SET ANSI_NULLS ON
 GO
 
 SET QUOTED_IDENTIFIER ON
 GO
 
-CREATE or alter   VIEW [qc].[SPP_04_B] AS
+--QC code: SPP_04_B
+--QC name: SPP_04_B Consistency – [ProcessActivityEnd] SPP_05
+--QC rule description: For every new [ProcessActivityBegin] within the same CountryCode and AssessmentMethodId, all other [ProcessActivityBegin] must be accompanied by [ProcessActivityEnd] & the new [ProcessActivityBegin] must be >= latest [ProcessActivityEnd] 
+CREATE     VIEW [qc].[SPP_04_B] AS
 WITH src AS (
 SELECT
 [CountryCode],
