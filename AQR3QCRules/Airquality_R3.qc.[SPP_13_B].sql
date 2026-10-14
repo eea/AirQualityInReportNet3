@@ -1,7 +1,7 @@
 USE [Airquality_R3]
 GO
 
-/****** Object:  View [qc].[SPP_13_B]    Script Date: 29/09/2026 13:19:22 ******/
+/****** Object:  View [qc].[SPP_13_B]    Script Date: 14/10/2026 10:56:12 ******/
 SET ANSI_NULLS ON
 GO
 
@@ -9,46 +9,61 @@ SET QUOTED_IDENTIFIER ON
 GO
 
 
-CREATE   VIEW [qc].[SPP_13_B]
+CREATE OR ALTER   VIEW [qc].[SPP_13_B]
 AS
-/* ============================================================
-   QC rule code: SPP_13_B
-   QC rule name: EquivalenceDemonstrationDocumentId document
-                 type and table origin validation
+-- Creation date: August 2025
+-- QC rule code: SPP_13_B
+-- QC rule name: SPP_13_B Cross-check - [EquivalenceDemonstrationDocumentId]
+-- QC rule description: The EquivalenceDemonstrationDocumentId must refer to a document classified as SamplingProcess in DOC_02 and as EquivalenceDemonstrationDocumentId in DOC_03.
 
-   EquivalenceDemonstrationDocumentId must match a record in
-   reporting.Documentation, for the same CountryCode, with:
-
-   - DataTable    = aq/datatable/SamplingProcess
-   - DocumentType = aq/documenttype/EquivalenceDemonstrationDocumentId
-
-   Missing or empty EquivalenceDemonstrationDocumentId values are
-   expected to be validated by the corresponding mandatory-value
-   rule.
-   ============================================================ */
+WITH sp AS
+(
+    SELECT
+        spp.CountryCode,
+        spp.ProcessId,
+        spp.AssessmentMethodId,
+        spp.ProcessActivityBegin,
+        spp.ProcessActivityEnd,
+        spp.PollutantId,
+        spp.EquivalenceDemonstrationDocumentId,
+        NULLIF(
+            LTRIM(RTRIM(CONVERT(NVARCHAR(100), spp.CountryCode))),
+            N''
+        ) COLLATE Latin1_General_CI_AS AS CountryCode_norm,
+        NULLIF(
+            LTRIM(RTRIM(CONVERT(NVARCHAR(200), spp.EquivalenceDemonstrationDocumentId))),
+            N''
+        ) COLLATE Latin1_General_CI_AS AS EquivalenceDemonstrationDocumentId_norm
+    FROM [reporting].[SamplingProcess] AS spp
+)
 SELECT
-    spp.CountryCode,
-    spp.ProcessId,
-    spp.AssessmentMethodId,
-    spp.ProcessActivityBegin,
-    spp.ProcessActivityEnd,
-    spp.PollutantId,
-    spp.EquivalenceDemonstrationDocumentId,
-    'EquivalenceDemonstrationDocumentId does not match a reporting.Documentation record with the required DataTable and DocumentType for the same CountryCode.'
-        AS QCMessage
-FROM [reporting].[SamplingProcess] AS spp
+    s.CountryCode,
+    s.ProcessId,
+    s.AssessmentMethodId,
+    s.ProcessActivityBegin,
+    s.ProcessActivityEnd,
+    s.PollutantId,
+    s.EquivalenceDemonstrationDocumentId
+FROM sp AS s
 WHERE
-    /* This rule only checks populated document identifiers. */
-    NULLIF(LTRIM(RTRIM(spp.EquivalenceDemonstrationDocumentId)), '') IS NOT NULL
+    s.EquivalenceDemonstrationDocumentId_norm IS NOT NULL
     AND NOT EXISTS
     (
         SELECT 1
         FROM [reporting].[Documentation] AS doc
-        WHERE doc.CountryCode = spp.CountryCode
-          AND doc.DocumentId = spp.EquivalenceDemonstrationDocumentId
-          AND doc.DataTable = 'aq/datatable/SamplingProcess'
-          AND doc.DocumentType = 'aq/documenttype/EquivalenceDemonstrationDocumentId'
+        WHERE
+            NULLIF(
+                LTRIM(RTRIM(CONVERT(NVARCHAR(100), doc.CountryCode))),
+                N''
+            ) COLLATE Latin1_General_CI_AS = s.CountryCode_norm
+            AND NULLIF(
+                LTRIM(RTRIM(CONVERT(NVARCHAR(200), doc.DocumentId))),
+                N''
+            ) COLLATE Latin1_General_CI_AS = s.EquivalenceDemonstrationDocumentId_norm
+            AND LTRIM(RTRIM(CONVERT(NVARCHAR(500), doc.DataTable)))
+                COLLATE Latin1_General_CI_AS = N'aq/datatable/SamplingProcess'
+            AND LTRIM(RTRIM(CONVERT(NVARCHAR(500), doc.DocumentType)))
+                COLLATE Latin1_General_CI_AS =
+                N'aq/documenttype/EquivalenceDemonstrationDocumentId'
     );
 GO
-
-

@@ -1,7 +1,7 @@
 USE [Airquality_R3]
 GO
 
-/****** Object:  View [qc].[STA_03_A_TEST]    Script Date: 11/06/2026 10:30:28 ******/
+/****** Object:  View [qc].[STA_03_A]    Script Date: 13/10/2026 13:17:17 ******/
 SET ANSI_NULLS ON
 GO
 
@@ -13,12 +13,13 @@ GO
 
 
 
-create or alter VIEW [qc].[STA_03_A] AS
+
+create   VIEW [qc].[STA_03_A] AS
 
 
--- QC rule code: STA.03.A
--- QC rule name: STA.03.A Constraint - [AirQualityNetwork] STA.01 STA.07
-
+-- QC rule code: STA_03_A
+-- QC rule name: STA_03_A Constraint - [AirQualityNetwork] 
+-- QC rule description: The combination of CountryCode, StationEoICode and NetworkId must be unique in the MeasurementStation table. NetworkId shall also conform to the expected identifier structure for air quality networks.
 
 WITH CTE_station AS (
   SELECT 

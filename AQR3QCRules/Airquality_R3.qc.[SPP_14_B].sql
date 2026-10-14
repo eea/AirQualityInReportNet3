@@ -1,7 +1,7 @@
 USE [Airquality_R3]
 GO
 
-/****** Object:  View [qc].[SPP_14_B]    Script Date: 29/09/2026 13:19:29 ******/
+/****** Object:  View [qc].[SPP_14_B]    Script Date: 14/10/2026 10:57:20 ******/
 SET ANSI_NULLS ON
 GO
 
@@ -9,22 +9,13 @@ SET QUOTED_IDENTIFIER ON
 GO
 
 
-CREATE   VIEW [qc].[SPP_14_B]
+
+CREATE     VIEW [qc].[SPP_14_B]
 AS
-/* ============================================================
-   QC rule code: SPP_14_B
-   QC rule name: ProcessDocumentId document type and table
-                 origin validation
-
-   ProcessDocumentId must match a record in reporting.Documentation
-   for the same CountryCode, with:
-
-   - DataTable    = aq/datatable/SamplingProcess
-   - DocumentType = aq/documenttype/ProcessDocumentId
-
-   Missing, empty, or non-existing ProcessDocumentId values are
-   validated by SPP_14_A.
-   ============================================================ */
+-- Creation date: August 2025
+-- QC rule code: SPP_14_B
+-- QC rule name: SPP_14_B Cross-check - [ProcessDocumentId]
+-- QC rule description: The ProcessDocumentId must refer to a document classified as SamplingProcess in DOC_02 and as ProcessDocumentId in DOC_03.
 SELECT
     spp.CountryCode,
     spp.ProcessId,
@@ -32,9 +23,7 @@ SELECT
     spp.ProcessActivityBegin,
     spp.ProcessActivityEnd,
     spp.PollutantId,
-    spp.ProcessDocumentId,
-    'ProcessDocumentId does not match a reporting.Documentation record with the required DataTable and DocumentType for the same CountryCode.'
-        AS QCMessage
+    spp.ProcessDocumentId
 FROM [reporting].[SamplingProcess] AS spp
 WHERE
     /* Only populated values are validated by this rule. */
@@ -43,8 +32,8 @@ WHERE
     (
         SELECT 1
         FROM [reporting].[Documentation] AS doc
-        WHERE doc.CountryCode = spp.CountryCode
-          AND doc.DocumentId = spp.ProcessDocumentId
+        WHERE --doc.CountryCode = spp.CountryCode AND
+           doc.DocumentId = spp.ProcessDocumentId
           AND doc.DataTable = 'aq/datatable/SamplingProcess'
           AND doc.DocumentType = 'aq/documenttype/ProcessDocumentId'
     );
