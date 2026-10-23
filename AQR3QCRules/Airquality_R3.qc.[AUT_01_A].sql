@@ -1,7 +1,7 @@
 USE [Airquality_R3]
 GO
 
-/****** Object:  View [qc].[AUT_01_A]    Script Date: 20/10/2026 16:19:09 ******/
+/****** Object:  View [qc].[AUT_01_A]    Script Date: 23/10/2026 12:15:43 ******/
 SET ANSI_NULLS ON
 GO
 
@@ -9,7 +9,8 @@ SET QUOTED_IDENTIFIER ON
 GO
 
 
-CREATE OR ALTER   VIEW [qc].[AUT_01_A]
+
+CREATE     VIEW [qc].[AUT_01_A]
 AS
 
 -- Creation date: 20 October 2026

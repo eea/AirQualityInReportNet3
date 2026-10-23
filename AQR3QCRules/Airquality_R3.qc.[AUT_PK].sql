@@ -1,7 +1,7 @@
 USE [Airquality_R3]
 GO
 
-/****** Object:  View [qc].[AUT_PK]    Script Date: 20/10/2026 13:17:26 ******/
+/****** Object:  View [qc].[AUT_PK]    Script Date: 23/10/2026 12:15:38 ******/
 SET ANSI_NULLS ON
 GO
 
@@ -10,8 +10,8 @@ GO
 
 
 /* ============================================================
-   QC rule code: AUT_PK
-   QC rule name: AUT_PK Constraint
+   QC rule code: AUT.PK
+   QC rule name: AUT.PK Constraint
    QC rule description: Primary key uniqueness validation
    Primary key: CountryCode, AuthorityInstanceId, AuthorityRole, Email
    ============================================================ */
@@ -43,7 +43,6 @@ duplicate_auth_records AS
     HAVING COUNT(*) > 1
 )
 SELECT
-/*record_id*/
     a.CountryCode,
     a.AuthorityInstanceId,
     a.AuthorityRole,
