@@ -1,39 +1,44 @@
 USE [Airquality_R3]
 GO
 
-/****** Object:  View [qc].[SPP_04_A]    Script Date: 07/10/2026 12:32:09 ******/
+/****** Object:  View [qc].[SPP_04_A]    Script Date: 22/10/2026 17:06:18 ******/
 SET ANSI_NULLS ON
 GO
 
 SET QUOTED_IDENTIFIER ON
 GO
 
+
 --QC code: SPP_04_A
---QC name: SPP_04_A Consistency  � [ProcessActivityEnd] SPP_05
---QC rule description: Attribute SPP_04 value must be <= SPP_05 if SPP_05 is not null (when SPP_04 = SPP_05 the record is meant for deletion)
+--QC name: SPP_04_A Format – [ProcessActivityBegin]
+--QC rule description: Attribute SPP_04 must follow ISO8601, e.g. '2025-01-01T00:00:00' for UTC/Zulu or '2025-01-01T00:00:00+02:00' for UTC+2
 
-CREATE OR ALTER   VIEW [qc].[SPP_04_A] AS
-	WITH src AS (
-	SELECT
+CREATE     VIEW [qc].[SPP_04_A] AS
+
+WITH src AS (
+SELECT
 	[CountryCode],
 	[AssessmentMethodId],
 	[ProcessActivityBegin],
-	[ProcessActivityEnd],
-		TRY_CONVERT(datetimeoffset(0), NULLIF(LTRIM(RTRIM(CONVERT(nvarchar(50), [ProcessActivityBegin]))), ''), 126) AS Begin_dt,
-		TRY_CONVERT(datetimeoffset(0), NULLIF(LTRIM(RTRIM(CONVERT(nvarchar(50), [ProcessActivityEnd]))), ''), 126) AS End_dt
-	FROM [reporting].[SamplingProcess]
-	)
-	SELECT
+	NULLIF(LTRIM(RTRIM(CONVERT(nvarchar(50), [ProcessActivityBegin]))), '') AS Begin_str,
+	TRY_CONVERT(datetimeoffset(0),
+
+	NULLIF(LTRIM(RTRIM(CONVERT(nvarchar(50), [ProcessActivityBegin]))), ''),
+	126) AS Begin_as_dto, -- ISO 8601 with Z or ±HH:MM
+	TRY_CONVERT(datetime2(0),
+
+	NULLIF(LTRIM(RTRIM(CONVERT(nvarchar(50), [ProcessActivityBegin]))), ''),
+	126) AS Begin_as_dt2 -- ISO 8601 without offset
+FROM [reporting].[SamplingProcess]
+)
+SELECT
 	[CountryCode],
 	[AssessmentMethodId],
-	[ProcessActivityBegin],
-	[ProcessActivityEnd]
-	FROM src
-	WHERE End_dt IS NOT NULL
-	AND Begin_dt IS NOT NULL
-	AND Begin_dt > End_dt;
-
-
+	[ProcessActivityBegin]
+FROM src
+	WHERE Begin_str IS NOT NULL
+	AND Begin_as_dto IS NULL
+	AND Begin_as_dt2 IS NULL;
 GO
 
 

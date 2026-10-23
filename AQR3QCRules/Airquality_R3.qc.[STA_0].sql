@@ -14,6 +14,7 @@ alter VIEW [qc].[STA_0] AS
 
 -- QC rule code: STA_0
 -- QC rule name: STA_0 Status - [PK]
+-- QC rule description: Reported MeasurementStation records shall be identified as new records or updates to existing reference records.
 
 
 WITH cte_submitted AS (

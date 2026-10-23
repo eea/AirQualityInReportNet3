@@ -13,8 +13,9 @@ GO
 
 CREATE VIEW [qc].[STA_PK] AS
 
--- QC rule code: STA.PK
--- QC rule name: STA.PK Constraint - [CountryCode,AirQualityStationEoICode]
+-- QC rule code: STA_PK
+-- QC rule name: STA_PK Constraint - -
+-- QC rule description: The values reported under CountryCode and StationEoICode cannot be null and the combination shall be unique in the MeasurementStation table.
 
 WITH CTE_station AS (
   SELECT 

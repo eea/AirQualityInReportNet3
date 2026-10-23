@@ -1,7 +1,7 @@
 USE [Airquality_R3]
 GO
 
-/****** Object:  View [qc].[SPP_04_D]    Script Date: 29/09/2026 13:20:32 ******/
+/****** Object:  View [qc].[SPP_04_D]    Script Date: 15/10/2026 12:44:51 ******/
 SET ANSI_NULLS ON
 GO
 
@@ -11,21 +11,9 @@ GO
 
 CREATE   VIEW [qc].[SPP_04_D]
 AS
-/* ============================================================
-   QC rule code: SPP_04_D
-   QC rule name: Overall SamplingProcess activity period matches
-                 overall SamplingPointLocation period
-
-   Aggregation level:
-   - CountryCode
-   - AssessmentMethodId
-
-   Validation rules:
-   1. Earliest ProcessActivityBegin = earliest LocationBegin.
-   2. Latest closed ProcessActivityEnd = latest closed LocationEnd.
-   3. If any SamplingProcess is open-ended, at least one
-      SamplingPointLocation must be open-ended.
-   ============================================================ */
+--QC code: SPP_04_D
+--QC name: SPP_04_D Cross-check – [AssessmentMethodId], [ProcessActivityBegin], [ProcessActivityEnd]
+--QC rule description: The overall sampling process activity period shall be consistent with the overall SamplingPointLocation period for the same CountryCode and AssessmentMethodId.
 
 WITH ProcessPeriod AS
 (

@@ -1,40 +1,77 @@
 USE [Airquality_R3]
 GO
 
-/****** Object:  View [qc].[SPP_04_C]    Script Date: 25/06/2026 13:08:58 ******/
+/****** Object:  View [qc].[SPP_04_C]    Script Date: 22/10/2026 17:13:37 ******/
 SET ANSI_NULLS ON
 GO
 
 SET QUOTED_IDENTIFIER ON
 GO
 
---QC code: SPP_04_C
---QC name: SPP_04_C Format – [ProcessActivityBegin]
---QC rule description: Attribute SPP_04 must follow ISO8601, e.g. '2025-01-01T00:00:00' for UTC/Zulu or '2025-01-01T00:00:00+02:00' for UTC
-CREATE OR ALTER VIEW [qc].[SPP_04_C] AS
 
+
+--QC code: SPP_04_C
+--QC name: SPP_04_C Cross-check	[CountryCode], [AssessmentMethodId], [ProcessActivityBegin], [ProcessActivityEnd]
+--QC rule description: Sampling process activity periods shall not overlap for the same AssessmentMethodId within the same CountryCode.
+CREATE     VIEW [qc].[SPP_04_C] AS
 WITH src AS (
 SELECT
-	[CountryCode],
-	[AssessmentMethodId],
-	[ProcessActivityBegin],
-	NULLIF(LTRIM(RTRIM(CONVERT(nvarchar(50), [ProcessActivityBegin]))), '') AS Begin_str,
-	TRY_CONVERT(datetimeoffset(0),
-
-	NULLIF(LTRIM(RTRIM(CONVERT(nvarchar(50), [ProcessActivityBegin]))), ''),
-	126) AS Begin_as_dto, -- ISO 8601 with Z or ±HH:MM
-	TRY_CONVERT(datetime2(0),
-
-	NULLIF(LTRIM(RTRIM(CONVERT(nvarchar(50), [ProcessActivityBegin]))), ''),
-	126) AS Begin_as_dt2 -- ISO 8601 without offset
+[CountryCode],
+[AssessmentMethodId],
+[ProcessActivityBegin],
+[ProcessActivityEnd],
+--PArse ISO 8601; 
+TRY_CONVERT(datetimeoffset(0),
+NULLIF(LTRIM(RTRIM(CONVERT(nvarchar(50), [ProcessActivityBegin], 126))), ''),
+126) AS Begin_dt,
+TRY_CONVERT(datetimeoffset(0),
+NULLIF(LTRIM(RTRIM(CONVERT(nvarchar(50), [ProcessActivityEnd], 126))), ''),
+126) AS End_dt
 FROM [reporting].[SamplingProcess]
-)
+),
+ordered AS (
 SELECT
-	[CountryCode],
-	[AssessmentMethodId],
-	[ProcessActivityBegin]
-FROM src
-	WHERE Begin_str IS NOT NULL
-	AND Begin_as_dto IS NULL
-	AND Begin_as_dt2 IS NULL;
+s.*,
+MAX(End_dt) OVER (
+PARTITION BY [CountryCode], [AssessmentMethodId]
+ORDER BY Begin_dt
+ROWS BETWEEN UNBOUNDED PRECEDING AND 1 PRECEDING
+) AS prev_max_end
+FROM src s
+),
+-- TYpe 1 : Previous interval without End exists (later Begin present)
+prev_open AS (
+SELECT e.[CountryCode], e.[AssessmentMethodId],
+e.[ProcessActivityBegin], e.[ProcessActivityEnd],
+'Previous interval without End exists (later Begin present)' AS violation,
+CAST(NULL AS datetimeoffset(0)) AS [LatestPreviousEnd]
+FROM ordered e
+WHERE e.End_dt IS NULL
+AND e.Begin_dt IS NOT NULL
+AND EXISTS (
+SELECT 1
+FROM ordered n
+WHERE n.[CountryCode] = e.[CountryCode]
+AND n.[AssessmentMethodId] = e.[AssessmentMethodId]
+AND n.Begin_dt IS NOT NULL
+AND n.Begin_dt > e.Begin_dt
+)
+),
+-- Type 2: Begin earlier than latest previous End
+order_err AS (
+SELECT n.[CountryCode], n.[AssessmentMethodId],
+n.[ProcessActivityBegin], n.[ProcessActivityEnd],
+'Begin earlier than latest previous End' AS violation,
+n.prev_max_end AS [LatestPreviousEnd]
+FROM ordered n
+WHERE n.Begin_dt IS NOT NULL
+AND n.prev_max_end IS NOT NULL
+AND n.Begin_dt < n.prev_max_end
+)
+SELECT * FROM prev_open
+UNION ALL
+SELECT * FROM order_err;
+
 GO
+
+
