@@ -1,37 +1,58 @@
-USE [Airquality_R3]
+USE [Airquality_R3];
 GO
 
-/****** Object:  View [qc].[[SPP_05_A]]    Script Date: 25/06/2026 13:08:58 ******/
-SET ANSI_NULLS ON
+/****** Object:  View [qc].[SPP_05_A] ******/
+SET ANSI_NULLS ON;
 GO
 
-SET QUOTED_IDENTIFIER ON
+SET QUOTED_IDENTIFIER ON;
 GO
+
 --QC code: SPP_05_A
 --QC name: SPP_05_A Format – [ProcessActivityEnd]
---QC rule description: Attribute SPP_05 must follow ISO8601, e.g. '2025-01-01T00:00:00' for UTC/Zulu or '2025-01-01T00:00:00+02:00' for UTC+2
+--QC rule description: ProcessActivityEnd may be null for active sampling processes. If reported, it must be a valid datetime in ISO 8601 format and must not be empty or contain only spaces.
 
-CREATE OR ALTER VIEW [qc].[SPP_05_A] AS
-WITH src AS (
-SELECT
-[CountryCode],
-[AssessmentMethodId],
-[ProcessActivityEnd],
-NULLIF(LTRIM(RTRIM(CONVERT(nvarchar(50), [ProcessActivityEnd]))), '') AS End_str,
-TRY_CONVERT(datetimeoffset(0),
-NULLIF(LTRIM(RTRIM(CONVERT(nvarchar(50), [ProcessActivityEnd]))), ''),
-126) AS End_as_dto, -- ISO 8601 with Z or ±HH:MM
-TRY_CONVERT(datetime2(0),
-NULLIF(LTRIM(RTRIM(CONVERT(nvarchar(50), [ProcessActivityEnd]))), ''),
-126) AS End_as_dt2 -- ISO 8601 without offset
-FROM [reporting].[SamplingProcess]
+CREATE OR ALTER VIEW [qc].[SPP_05_A]
+AS
+WITH src AS
+(
+    SELECT
+        [CountryCode],
+        [AssessmentMethodId],
+        [ProcessActivityEnd],
+        LTRIM(RTRIM(CONVERT(nvarchar(50), [ProcessActivityEnd]))) AS End_str,
+        TRY_CONVERT(
+            datetimeoffset(0),
+            NULLIF(
+                LTRIM(RTRIM(CONVERT(nvarchar(50), [ProcessActivityEnd]))),
+                ''
+            ),
+            126
+        ) AS End_as_dto,
+        TRY_CONVERT(
+            datetime2(0),
+            NULLIF(
+                LTRIM(RTRIM(CONVERT(nvarchar(50), [ProcessActivityEnd]))),
+                ''
+            ),
+            126
+        ) AS End_as_dt2
+    FROM [reporting].[SamplingProcess]
 )
 SELECT
-[CountryCode],
-[AssessmentMethodId],
-[ProcessActivityEnd]
+    [CountryCode],
+    [AssessmentMethodId],
+    [ProcessActivityEnd]
 FROM src
-WHERE End_str IS NOT NULL
-AND End_as_dto IS NULL
-AND End_as_dt2 IS NULL;
+WHERE
+    [ProcessActivityEnd] IS NOT NULL
+    AND
+    (
+        End_str = ''
+        OR
+        (
+            End_as_dto IS NULL
+            AND End_as_dt2 IS NULL
+        )
+    );
 GO
