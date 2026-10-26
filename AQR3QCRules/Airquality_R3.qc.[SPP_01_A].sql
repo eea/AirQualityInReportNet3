@@ -1,13 +1,17 @@
-USE [Airquality_R3];
+USE [Airquality_R3]
 GO
 
-SET ANSI_NULLS ON;
+/****** Object:  View [qc].[SPP_01_A]    Script Date: 26/10/2026 08:47:02 ******/
+SET ANSI_NULLS ON
 GO
 
-SET QUOTED_IDENTIFIER ON;
+SET QUOTED_IDENTIFIER ON
 GO
 
-ALTER VIEW [qc].[SPP_01_A]
+
+
+
+CREATE   VIEW [qc].[SPP_01_A]
 AS
 
 -- Creation date: October 2026
@@ -76,3 +80,5 @@ SELECT
     QC_FailureReason
 FROM missing_codes;
 GO
+
+
