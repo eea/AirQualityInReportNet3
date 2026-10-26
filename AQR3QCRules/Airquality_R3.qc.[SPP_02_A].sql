@@ -15,6 +15,7 @@ GO
 CREATE   VIEW [qc].SPP_02_A AS
 SELECT
 ProcessId,
+LEFT(LTRIM(RTRIM(ProcessId)), 150) AS ProcessId_Truncated,
 [CountryCode],
 [AssessmentMethodId]
 FROM [reporting].[SamplingProcess]
