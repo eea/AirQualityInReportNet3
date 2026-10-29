@@ -7,72 +7,39 @@ GO
 SET QUOTED_IDENTIFIER ON
 GO
 
-CREATE OR ALTER VIEW [qctesting].[SPO_02_C_TEST]
+CREATE OR ALTER VIEW [qc].[SPO_02_C]
 AS
 
-WITH src AS
+-- QC rule code: SPO_02_C
+-- QC rule name: SPO_02_C Cross-check - [AssessmentMethodId]
+-- QC rule description: AssessmentMethodId reported in the SamplingPoint table shall have at least one corresponding record in the SamplingPointLocation table.
+
+WITH sampling_points AS
 (
     SELECT
-        NULLIF(
-            LTRIM(RTRIM([CountryCode])),
-            ''
-        ) AS CountryCode,
-
-        NULLIF(
-            LTRIM(RTRIM([AssessmentMethodId])),
-            ''
-        ) AS AssessmentMethodId,
-
-        NULLIF(
-            LTRIM(RTRIM([SamplingPointReferenceId])),
-            ''
-        ) AS SamplingPointReferenceId
-
-    FROM reporting.SamplingPoint
+        NULLIF(LTRIM(RTRIM([CountryCode])), '') AS CountryCode,
+        NULLIF(LTRIM(RTRIM([AssessmentMethodId])), '') AS AssessmentMethodId
+    FROM [reporting].[SamplingPoint]
 ),
-
-duplicates AS
+sampling_point_locations AS
 (
-    SELECT
-        CountryCode,
-        AssessmentMethodId
-    FROM src
-    GROUP BY
-        CountryCode,
-        AssessmentMethodId
-    HAVING COUNT(DISTINCT SamplingPointReferenceId) > 1
-),
-
-reference_samplingpoint AS
-(
-    SELECT
-        CountryCode,
-        AssessmentMethodId,
-        SamplingPointReferenceId
-    FROM reference.SamplingPoint
+    SELECT DISTINCT
+        NULLIF(LTRIM(RTRIM([CountryCode])), '') AS CountryCode,
+        NULLIF(LTRIM(RTRIM([AssessmentMethodId])), '') AS AssessmentMethodId
+    FROM [reporting].[SamplingPointLocation]
 )
-
 SELECT
-    s.CountryCode,
-    s.AssessmentMethodId,
-    s.SamplingPointReferenceId
-
-FROM src s
-
-LEFT JOIN duplicates d
-    ON s.CountryCode = d.CountryCode
-   AND s.AssessmentMethodId = d.AssessmentMethodId
-
-LEFT JOIN reference_samplingpoint r
-    ON s.CountryCode = r.CountryCode
-   AND s.AssessmentMethodId = r.AssessmentMethodId
-
-WHERE
-    d.CountryCode IS NOT NULL
-    OR
-    (
-        r.AssessmentMethodId IS NOT NULL
-        AND ISNULL(s.SamplingPointReferenceId, '') <> ISNULL(r.SamplingPointReferenceId, '')
-    );
-
+    sp.CountryCode,
+    sp.AssessmentMethodId
+FROM sampling_points AS sp
+WHERE sp.AssessmentMethodId IS NULL
+   OR NOT EXISTS
+   (
+       SELECT 1
+       FROM sampling_point_locations AS spl
+       WHERE sp.CountryCode COLLATE DATABASE_DEFAULT =
+             spl.CountryCode COLLATE DATABASE_DEFAULT
+         AND sp.AssessmentMethodId COLLATE DATABASE_DEFAULT =
+             spl.AssessmentMethodId COLLATE DATABASE_DEFAULT
+   )
 GO

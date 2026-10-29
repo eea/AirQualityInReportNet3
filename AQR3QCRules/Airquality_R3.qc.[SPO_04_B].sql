@@ -7,69 +7,69 @@ GO
 SET QUOTED_IDENTIFIER ON
 GO
 
-CREATE OR ALTER VIEW [qctesting].[SPO_04_B_TEST]
+CREATE OR ALTER VIEW [qc].[SPO_04_B]
 AS
+
+-- QC rule code: SPO_04_B
+-- QC rule name: SPO_04_B Constraint - [AssessmentMethodId,PollutantId]
+-- QC rule description: Each AssessmentMethodId shall be associated with one single PollutantId within each reported CountryCode.
 
 WITH src AS
 (
     SELECT
-        NULLIF(
-            LTRIM(RTRIM([CountryCode])),
-            ''
-        ) AS CountryCode,
-
-        NULLIF(
-            LTRIM(RTRIM([AssessmentMethodId])),
-            ''
-        ) AS AssessmentMethodId,
-
+        NULLIF(LTRIM(RTRIM([CountryCode])), '') AS CountryCode,
+        NULLIF(LTRIM(RTRIM([AssessmentMethodId])), '') AS AssessmentMethodId,
         [PollutantId]
-
-    FROM reporting.SamplingPoint
+    FROM [reporting].[SamplingPoint]
 ),
-
-duplicates AS
+inconsistent_submitted_data AS
 (
     SELECT
         CountryCode,
         AssessmentMethodId
     FROM src
+    WHERE AssessmentMethodId IS NOT NULL
     GROUP BY
         CountryCode,
         AssessmentMethodId
     HAVING COUNT(DISTINCT PollutantId) > 1
 ),
-
-reference_samplingpoint AS
+reference_sampling_points AS
 (
     SELECT
-        CountryCode,
-        AssessmentMethodId,
-        PollutantId
-    FROM reference.SamplingPoint
+        NULLIF(LTRIM(RTRIM([CountryCode])), '') AS CountryCode,
+        NULLIF(LTRIM(RTRIM([AssessmentMethodId])), '') AS AssessmentMethodId,
+        [PollutantId]
+    FROM [reference].[SamplingPoint]
 )
-
 SELECT
     s.CountryCode,
     s.AssessmentMethodId,
     s.PollutantId
-
-FROM src s
-
-LEFT JOIN duplicates d
-    ON s.CountryCode = d.CountryCode
-   AND s.AssessmentMethodId = d.AssessmentMethodId
-
-LEFT JOIN reference_samplingpoint r
-    ON s.CountryCode = r.CountryCode
-   AND s.AssessmentMethodId = r.AssessmentMethodId
-
+FROM src AS s
 WHERE
-    d.CountryCode IS NOT NULL
-    OR
+    EXISTS
     (
-        r.AssessmentMethodId IS NOT NULL
-        AND s.PollutantId <> r.PollutantId
-    );
-
+        SELECT 1
+        FROM inconsistent_submitted_data AS d
+        WHERE s.CountryCode COLLATE DATABASE_DEFAULT =
+              d.CountryCode COLLATE DATABASE_DEFAULT
+          AND s.AssessmentMethodId COLLATE DATABASE_DEFAULT =
+              d.AssessmentMethodId COLLATE DATABASE_DEFAULT
+    )
+    OR EXISTS
+    (
+        SELECT 1
+        FROM reference_sampling_points AS r
+        WHERE s.CountryCode COLLATE DATABASE_DEFAULT =
+              r.CountryCode COLLATE DATABASE_DEFAULT
+          AND s.AssessmentMethodId COLLATE DATABASE_DEFAULT =
+              r.AssessmentMethodId COLLATE DATABASE_DEFAULT
+          AND
+          (
+              s.PollutantId <> r.PollutantId
+              OR (s.PollutantId IS NULL AND r.PollutantId IS NOT NULL)
+              OR (s.PollutantId IS NOT NULL AND r.PollutantId IS NULL)
+          )
+    )
 GO

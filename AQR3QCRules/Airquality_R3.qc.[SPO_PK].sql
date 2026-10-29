@@ -7,42 +7,37 @@ GO
 SET QUOTED_IDENTIFIER ON
 GO
 
-CREATE OR ALTER VIEW [qctesting].[SPO_PK_TEST]
+CREATE OR ALTER VIEW [qc].[SPO_PK]
 AS
 
-WITH src AS
-(
-    SELECT
-        [CountryCode],
-        [AssessmentMethodId]
-    FROM reporting.SamplingPoint
-),
+-- QC rule code: SPO_PK
+-- QC rule name: SPO_PK Constraint - [CountryCode,AssessmentMethodId]
+-- QC rule description: The quality control shall verify that each record reported in the SamplingPoint table is uniquely identified by the combination of CountryCode and AssessmentMethodId. None of the primary key attributes shall be null and no two records shall share the same combination of primary key values.
 
-duplicates AS
-(
+WITH CTE_SPO AS (
+    SELECT
+        NULLIF("CountryCode", '') AS CountryCode,
+        NULLIF("AssessmentMethodId", '') AS AssessmentMethodId
+    FROM reporting."samplingpoint"
+),
+duplicate_spo_records AS (
     SELECT
         CountryCode,
         AssessmentMethodId
-    FROM src
+    FROM CTE_SPO
     GROUP BY
         CountryCode,
         AssessmentMethodId
     HAVING COUNT(*) > 1
 )
-
 SELECT
-    s.CountryCode,
-    s.AssessmentMethodId
-
-FROM src s
-
-LEFT JOIN duplicates d
-    ON s.CountryCode = d.CountryCode
-   AND s.AssessmentMethodId = d.AssessmentMethodId
-
-WHERE
-    s.CountryCode IS NULL
-    OR s.AssessmentMethodId IS NULL
-    OR d.CountryCode IS NOT NULL;
-
+    a.CountryCode,
+    a.AssessmentMethodId
+FROM CTE_SPO AS a
+LEFT JOIN duplicate_spo_records AS d
+    ON a.CountryCode = d.CountryCode
+   AND a.AssessmentMethodId = d.AssessmentMethodId
+WHERE d.CountryCode IS NOT NULL
+   OR a.CountryCode IS NULL
+   OR a.AssessmentMethodId IS NULL
 GO
