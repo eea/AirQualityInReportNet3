@@ -25,10 +25,16 @@ WITH sampling_points AS
 pollutant_vocabulary AS
 (
     SELECT DISTINCT
-        TRY_CONVERT(int, LTRIM(RTRIM([Notation]))) AS PollutantId
+        TRY_CONVERT(
+            int,
+            REPLACE(
+                LOWER(LTRIM(RTRIM([URI]))),
+                'http://dd.eionet.europa.eu/vocabulary/aq/pollutant/',
+                ''
+            )
+        ) AS [PollutantId]
     FROM [reference].[Vocabulary]
-    WHERE [vocabulary] COLLATE DATABASE_DEFAULT =
-          'pollutant' COLLATE DATABASE_DEFAULT
+    WHERE [vocabulary] = 'pollutant'
 )
 SELECT
     sp.CountryCode,
