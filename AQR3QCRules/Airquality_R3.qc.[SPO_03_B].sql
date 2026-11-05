@@ -33,11 +33,12 @@ expected_identifier AS
         sp.SamplingPointReferenceId,
         sp.StationEoICode,
         sp.PollutantId,
-        CONCAT(
+        CONCAT
+        (
             'SPOref_',
             sp.StationEoICode,
             '_',
-            CONVERT(varchar(11), sp.PollutantId),
+            RIGHT('0000' + CONVERT(varchar(11), sp.PollutantId), 4),
             '_'
         ) AS ExpectedPrefix
     FROM sampling_points AS sp
@@ -53,7 +54,8 @@ parsed_identifier AS
         e.ExpectedPrefix,
         CASE
             WHEN e.SamplingPointReferenceId LIKE e.ExpectedPrefix + '%'
-            THEN SUBSTRING(
+            THEN SUBSTRING
+            (
                 e.SamplingPointReferenceId,
                 LEN(e.ExpectedPrefix) + 1,
                 LEN(e.SamplingPointReferenceId)
