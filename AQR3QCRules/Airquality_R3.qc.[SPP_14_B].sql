@@ -1,12 +1,13 @@
-USE [Airquality_R3];
+USE [Airquality_R3]
 GO
 
-/****** Object:  View [qc].[SPP_14_B] ******/
-SET ANSI_NULLS ON;
+/****** Object:  View [qc].[SPP_14_B]    Script Date: 06/11/2026 14:27:57 ******/
+SET ANSI_NULLS ON
 GO
 
-SET QUOTED_IDENTIFIER ON;
+SET QUOTED_IDENTIFIER ON
 GO
+
 
 -- Creation date: August 2025
 -- QC rule code: SPP_14_B
@@ -38,6 +39,52 @@ WITH sp AS
             N''
         ) COLLATE Latin1_General_CI_AS AS ProcessDocumentId_norm
     FROM [reporting].[SamplingProcess] AS spp
+),
+valid_documentation AS
+(
+    SELECT
+        NULLIF
+        (
+            LTRIM(RTRIM(CONVERT(NVARCHAR(100), doc.CountryCode))),
+            N''
+        ) COLLATE Latin1_General_CI_AS AS CountryCode_norm,
+
+        NULLIF
+        (
+            LTRIM(RTRIM(CONVERT(NVARCHAR(200), doc.DocumentId))),
+            N''
+        ) COLLATE Latin1_General_CI_AS AS DocumentId_norm
+    FROM [reporting].[Documentation] AS doc
+    WHERE
+        LTRIM(RTRIM(CONVERT(NVARCHAR(500), doc.DataTable)))
+            COLLATE Latin1_General_CI_AS
+            = N'aq/datatable/SPP'
+        AND LTRIM(RTRIM(CONVERT(NVARCHAR(500), doc.DocumentType)))
+            COLLATE Latin1_General_CI_AS
+            = N'aq/documenttype/ProcessDocument'
+
+    UNION
+
+    SELECT
+        NULLIF
+        (
+            LTRIM(RTRIM(CONVERT(NVARCHAR(100), doc.CountryCode))),
+            N''
+        ) COLLATE Latin1_General_CI_AS AS CountryCode_norm,
+
+        NULLIF
+        (
+            LTRIM(RTRIM(CONVERT(NVARCHAR(200), doc.DocumentId))),
+            N''
+        ) COLLATE Latin1_General_CI_AS AS DocumentId_norm
+    FROM [reference].[Documentation] AS doc
+    WHERE
+        LTRIM(RTRIM(CONVERT(NVARCHAR(500), doc.DataTable)))
+            COLLATE Latin1_General_CI_AS
+            = N'aq/datatable/SPP'
+        AND LTRIM(RTRIM(CONVERT(NVARCHAR(500), doc.DocumentType)))
+            COLLATE Latin1_General_CI_AS
+            = N'aq/documenttype/ProcessDocument'
 )
 SELECT
     s.CountryCode,
@@ -54,26 +101,8 @@ WHERE
     AND NOT EXISTS
     (
         SELECT 1
-        FROM [reporting].[Documentation] AS doc
-        WHERE
-            NULLIF
-            (
-                LTRIM(RTRIM(CONVERT(NVARCHAR(100), doc.CountryCode))),
-                N''
-            ) COLLATE Latin1_General_CI_AS = s.CountryCode_norm
-
-            AND NULLIF
-            (
-                LTRIM(RTRIM(CONVERT(NVARCHAR(200), doc.DocumentId))),
-                N''
-            ) COLLATE Latin1_General_CI_AS = s.ProcessDocumentId_norm
-
-            AND LTRIM(RTRIM(CONVERT(NVARCHAR(500), doc.DataTable)))
-                COLLATE Latin1_General_CI_AS
-                = N'aq/datatable/SPP'
-
-            AND LTRIM(RTRIM(CONVERT(NVARCHAR(500), doc.DocumentType)))
-                COLLATE Latin1_General_CI_AS
-                = N'aq/documenttype/ProcessDocument'
+        FROM valid_documentation AS doc
+        WHERE doc.CountryCode_norm = s.CountryCode_norm
+          AND doc.DocumentId_norm = s.ProcessDocumentId_norm
     );
 GO
