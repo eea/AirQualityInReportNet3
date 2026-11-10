@@ -10,7 +10,7 @@ GO
 
 CREATE OR ALTER VIEW [qc].[ARZ_0] AS
 
--- Creation date: 27 November 2025
+-- Creation date: November 2025
 -- QC rule code: ARZ_0
 -- QC rule name: ARZ_0 Status - [PK]
 
