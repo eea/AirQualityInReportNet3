@@ -21,25 +21,58 @@ WITH sampling_points AS
         NULLIF(LTRIM(RTRIM([AssessmentMethodId])), '') AS AssessmentMethodId
     FROM [reporting].[SamplingPoint]
 ),
-sampling_point_locations AS
+reported_sampling_point_locations AS
 (
     SELECT DISTINCT
         NULLIF(LTRIM(RTRIM([CountryCode])), '') AS CountryCode,
         NULLIF(LTRIM(RTRIM([AssessmentMethodId])), '') AS AssessmentMethodId
     FROM [reporting].[SamplingPointLocation]
+),
+reference_sampling_point_locations AS
+(
+    SELECT DISTINCT
+        NULLIF(LTRIM(RTRIM([CountryCode])), '') AS CountryCode,
+        NULLIF(LTRIM(RTRIM([AssessmentMethodId])), '') AS AssessmentMethodId
+    FROM [reference].[SamplingPointLocation]
+),
+reported_spl_exists AS
+(
+    SELECT 1 AS HasReportedSPL
+    WHERE EXISTS
+    (
+        SELECT 1
+        FROM [reporting].[SamplingPointLocation]
+    )
 )
 SELECT
     sp.CountryCode,
     sp.AssessmentMethodId
 FROM sampling_points AS sp
 WHERE sp.AssessmentMethodId IS NULL
-   OR NOT EXISTS
+   OR
    (
-       SELECT 1
-       FROM sampling_point_locations AS spl
-       WHERE sp.CountryCode COLLATE DATABASE_DEFAULT =
-             spl.CountryCode COLLATE DATABASE_DEFAULT
-         AND sp.AssessmentMethodId COLLATE DATABASE_DEFAULT =
-             spl.AssessmentMethodId COLLATE DATABASE_DEFAULT
+       EXISTS (SELECT 1 FROM reported_spl_exists)
+       AND NOT EXISTS
+       (
+           SELECT 1
+           FROM reported_sampling_point_locations AS spl
+           WHERE spl.CountryCode COLLATE DATABASE_DEFAULT =
+                 sp.CountryCode COLLATE DATABASE_DEFAULT
+             AND spl.AssessmentMethodId COLLATE DATABASE_DEFAULT =
+                 sp.AssessmentMethodId COLLATE DATABASE_DEFAULT
+       )
+   )
+   OR
+   (
+       NOT EXISTS (SELECT 1 FROM reported_spl_exists)
+       AND NOT EXISTS
+       (
+           SELECT 1
+           FROM reference_sampling_point_locations AS rspl
+           WHERE rspl.CountryCode COLLATE DATABASE_DEFAULT =
+                 sp.CountryCode COLLATE DATABASE_DEFAULT
+             AND rspl.AssessmentMethodId COLLATE DATABASE_DEFAULT =
+                 sp.AssessmentMethodId COLLATE DATABASE_DEFAULT
+       )
    )
 GO

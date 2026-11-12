@@ -1,7 +1,7 @@
 USE [Airquality_R3]
 GO
 
-/****** Object:  View [qc].[STA_PK]    Script Date: 11/06/2026 13:42:42 ******/
+/****** Object:  View [qc].[STA_PK]    Script Date: 09/11/2026 13:54:38 ******/
 SET ANSI_NULLS ON
 GO
 
@@ -11,8 +11,10 @@ GO
 
 
 
-CREATE VIEW [qc].[STA_PK] AS
 
+CREATE   VIEW [qc].[STA_PK] AS
+
+-- Creation date: 02 September 2025
 -- QC rule code: STA_PK
 -- QC rule name: STA_PK Constraint - -
 -- QC rule description: The values reported under CountryCode and StationEoICode cannot be null and the combination shall be unique in the MeasurementStation table.

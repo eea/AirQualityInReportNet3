@@ -1,7 +1,7 @@
 USE [Airquality_R3]
 GO
 
-/****** Object:  View [qc].[STA_02_A]    Script Date: 03/07/2026 11:22:18 ******/
+/****** Object:  View [qc].[STA_02_A]    Script Date: 12/11/2026 12:10:38 ******/
 SET ANSI_NULLS ON
 GO
 
@@ -9,31 +9,43 @@ SET QUOTED_IDENTIFIER ON
 GO
 
 
-CREATE VIEW [qc].[STA_02_A] AS
+alter   VIEW [qc].[STA_02_A] AS
+
+-- QC rule code: STA_02_A
+-- QC rule name: STA_02_A Constraint - [StationEoICode]
+-- QC rule description: StationEoICode is the official Exchange of Information (EoI) identifier for the air quality measurement station and must be unique within each reported CountryCode.
+
 WITH s AS (
-SELECT
-NULLIF(LTRIM(RTRIM([StationEoICode])),'') AS [StationEoICode],
-NULLIF(LTRIM(RTRIM([CountryCode])),'') AS [CountryCode],
-NULLIF(LTRIM(RTRIM([NetworkId])),'') AS [NetworkId]
-FROM [reporting].[MeasurementStation]
-WHERE [StationEoICode] IS NOT NULL
+    SELECT
+        NULLIF(LTRIM(RTRIM([StationEoICode])),'') AS [StationEoICode],
+        NULLIF(LTRIM(RTRIM([CountryCode])),'')    AS [CountryCode]
+    FROM [reporting].[MeasurementStation]
 ),
-per_code AS (
-SELECT
-[StationEoICode],
-COUNT(DISTINCT [CountryCode]) AS [DistinctCountryCodes],
-COUNT(DISTINCT [NetworkId]) AS [DistinctNetworkIds]
-FROM s
-GROUP BY [StationEoICode]
+reported AS (
+    SELECT
+        [CountryCode],
+        [StationEoICode],
+        COUNT(*) AS [Occurrences]
+    FROM s
+    GROUP BY [CountryCode], [StationEoICode]
+),
+reference_stations AS (
+    SELECT
+        NULLIF(LTRIM(RTRIM([StationEoICode])),'') AS [StationEoICode],
+        COUNT(*) AS [ReferenceStations]
+    FROM [reference].[MeasurementStation]
+    GROUP BY NULLIF(LTRIM(RTRIM([StationEoICode])),'')
 )
 SELECT
-p.[StationEoICode],
-p.[DistinctCountryCodes],
-p.[DistinctNetworkIds]
-FROM per_code p
-WHERE p.[DistinctCountryCodes] > 1
-OR p.[DistinctNetworkIds] > 1;
-
+    r.[CountryCode],
+    r.[StationEoICode]
+FROM reported r
+LEFT JOIN reference_stations rs
+    ON r.[StationEoICode] = rs.[StationEoICode]
+WHERE r.[StationEoICode] IS NULL        -- points 1-3: not reported / null / empty
+   OR r.[Occurrences] > 1               -- point 4: same StationEoICode repeated within the same CountryCode
+   
+   --OR rs.[ReferenceStations] > 1;       -- point 5: code corresponds to more than one reference station
 GO
 
 
