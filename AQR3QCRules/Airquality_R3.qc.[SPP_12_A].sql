@@ -1,19 +1,21 @@
-USE [Airquality_R3];
+USE [Airquality_R3]
 GO
 
-/****** Object:  View [qc].[SPP_12_A2] ******/
-SET ANSI_NULLS ON;
+/****** Object:  View [qc].[SPP_12_A]    Script Date: 12/11/2026 17:01:34 ******/
+SET ANSI_NULLS ON
 GO
 
-SET QUOTED_IDENTIFIER ON;
+SET QUOTED_IDENTIFIER ON
 GO
+
+
 
 -- Creation date: July 2026
---QC code: SPP_12_A2
---QC name: SPP_12_A2 Cross-check - [DataQualityDocumentId]
+--QC code: SPP_12_A
+--QC name: SPP_12_A Cross-check - [DataQualityDocumentId]
 --QC rule description: The DataQualityDocumentId must exist as a DocumentId in the Documentation table, either within the current R3 submission or in the reference dataset.
 
-CREATE OR ALTER VIEW [qc].[SPP_12_A2]
+CREATE     VIEW [qc].[SPP_12_A]
 AS
 WITH sp AS
 (
@@ -80,3 +82,5 @@ WHERE
         )
     );
 GO
+
+

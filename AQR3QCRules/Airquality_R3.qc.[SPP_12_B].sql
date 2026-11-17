@@ -1,11 +1,13 @@
 USE [Airquality_R3]
 GO
 
+/****** Object:  View [qc].[SPP_12_B]    Script Date: 16/11/2026 12:56:33 ******/
 SET ANSI_NULLS ON
 GO
 
 SET QUOTED_IDENTIFIER ON
 GO
+
 
 CREATE OR ALTER VIEW [qc].[SPP_12_B]
 AS
@@ -128,7 +130,7 @@ document_validation AS
                 FROM all_documents AS d
                 WHERE d.DocumentId = s.DataQualityDocumentId
                   AND d.CountryCode = s.CountryCode_norm
-                  AND d.DataTable = N'aq/datatable/SamplingProcess'
+                  AND d.DataTable = N'aq/datatable/SPP'
             )
             THEN 1 ELSE 0
         END AS HasExpectedDataTable,
@@ -140,7 +142,7 @@ document_validation AS
                 FROM all_documents AS d
                 WHERE d.DocumentId = s.DataQualityDocumentId
                   AND d.CountryCode = s.CountryCode_norm
-                  AND d.DocumentType = N'aq/documenttype/DataQualityDocumentId'
+                  AND d.DocumentType = N'aq/documenttype/DataQualityDocument'
             )
             THEN 1 ELSE 0
         END AS HasExpectedDocumentType,
@@ -152,8 +154,8 @@ document_validation AS
                 FROM all_documents AS d
                 WHERE d.DocumentId = s.DataQualityDocumentId
                   AND d.CountryCode = s.CountryCode_norm
-                  AND d.DataTable = N'aq/datatable/SamplingProcess'
-                  AND d.DocumentType = N'aq/documenttype/DataQualityDocumentId'
+                  AND d.DataTable = N'aq/datatable/SPP'
+                  AND d.DocumentType = N'aq/documenttype/DataQualityDocument'
             )
             THEN 1 ELSE 0
         END AS HasValidDocument

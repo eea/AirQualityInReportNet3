@@ -1,108 +1,182 @@
 USE [Airquality_R3]
 GO
 
-/****** Object:  View [qc].[SPP_14_B]    Script Date: 06/11/2026 14:27:57 ******/
 SET ANSI_NULLS ON
 GO
 
 SET QUOTED_IDENTIFIER ON
 GO
 
+CREATE OR ALTER VIEW [qc].[SPP_14_B]
+AS
 
 -- Creation date: August 2025
 -- QC rule code: SPP_14_B
 -- QC rule name: SPP_14_B Cross-check - [ProcessDocumentId]
 -- QC rule description: The ProcessDocumentId must refer to a document classified as SPP in DOC_02 and as ProcessDocument in DOC_03.
 
-CREATE OR ALTER VIEW [qc].[SPP_14_B]
-AS
 WITH sp AS
 (
     SELECT
-        spp.CountryCode,
-        spp.ProcessId,
-        spp.AssessmentMethodId,
-        spp.ProcessActivityBegin,
-        spp.ProcessActivityEnd,
-        spp.PollutantId,
-        spp.ProcessDocumentId,
+        spp.[CountryCode],
+        spp.[ProcessId],
+        spp.[AssessmentMethodId],
+        spp.[ProcessActivityBegin],
+        spp.[ProcessActivityEnd],
+        spp.[PollutantId],
+        spp.[ProcessDocumentId] AS ProcessDocumentIdRaw,
 
         NULLIF
         (
-            LTRIM(RTRIM(CONVERT(NVARCHAR(100), spp.CountryCode))),
+            LTRIM(RTRIM(CONVERT(nvarchar(100), spp.[CountryCode]))),
             N''
         ) COLLATE Latin1_General_CI_AS AS CountryCode_norm,
 
         NULLIF
         (
-            LTRIM(RTRIM(CONVERT(NVARCHAR(200), spp.ProcessDocumentId))),
+            LTRIM(RTRIM(CONVERT(nvarchar(200), spp.[ProcessDocumentId]))),
             N''
-        ) COLLATE Latin1_General_CI_AS AS ProcessDocumentId_norm
+        ) COLLATE Latin1_General_CI_AS AS ProcessDocumentId
     FROM [reporting].[SamplingProcess] AS spp
 ),
-valid_documentation AS
+all_documents AS
 (
     SELECT
         NULLIF
         (
-            LTRIM(RTRIM(CONVERT(NVARCHAR(100), doc.CountryCode))),
+            LTRIM(RTRIM(CONVERT(nvarchar(100), d.[CountryCode]))),
             N''
-        ) COLLATE Latin1_General_CI_AS AS CountryCode_norm,
+        ) COLLATE Latin1_General_CI_AS AS CountryCode,
 
         NULLIF
         (
-            LTRIM(RTRIM(CONVERT(NVARCHAR(200), doc.DocumentId))),
+            LTRIM(RTRIM(CONVERT(nvarchar(200), d.[DocumentId]))),
             N''
-        ) COLLATE Latin1_General_CI_AS AS DocumentId_norm
-    FROM [reporting].[Documentation] AS doc
-    WHERE
-        LTRIM(RTRIM(CONVERT(NVARCHAR(500), doc.DataTable)))
-            COLLATE Latin1_General_CI_AS
-            = N'aq/datatable/SPP'
-        AND LTRIM(RTRIM(CONVERT(NVARCHAR(500), doc.DocumentType)))
-            COLLATE Latin1_General_CI_AS
-            = N'aq/documenttype/ProcessDocument'
+        ) COLLATE Latin1_General_CI_AS AS DocumentId,
 
-    UNION
+        NULLIF
+        (
+            LTRIM(RTRIM(CONVERT(nvarchar(500), d.[DataTable]))),
+            N''
+        ) COLLATE Latin1_General_CI_AS AS DataTable,
+
+        NULLIF
+        (
+            LTRIM(RTRIM(CONVERT(nvarchar(500), d.[DocumentType]))),
+            N''
+        ) COLLATE Latin1_General_CI_AS AS DocumentType
+    FROM [reporting].[Documentation] AS d
+
+    UNION ALL
 
     SELECT
         NULLIF
         (
-            LTRIM(RTRIM(CONVERT(NVARCHAR(100), doc.CountryCode))),
+            LTRIM(RTRIM(CONVERT(nvarchar(100), d.[CountryCode]))),
             N''
-        ) COLLATE Latin1_General_CI_AS AS CountryCode_norm,
+        ) COLLATE Latin1_General_CI_AS,
 
         NULLIF
         (
-            LTRIM(RTRIM(CONVERT(NVARCHAR(200), doc.DocumentId))),
+            LTRIM(RTRIM(CONVERT(nvarchar(200), d.[DocumentId]))),
             N''
-        ) COLLATE Latin1_General_CI_AS AS DocumentId_norm
-    FROM [reference].[Documentation] AS doc
-    WHERE
-        LTRIM(RTRIM(CONVERT(NVARCHAR(500), doc.DataTable)))
-            COLLATE Latin1_General_CI_AS
-            = N'aq/datatable/SPP'
-        AND LTRIM(RTRIM(CONVERT(NVARCHAR(500), doc.DocumentType)))
-            COLLATE Latin1_General_CI_AS
-            = N'aq/documenttype/ProcessDocument'
+        ) COLLATE Latin1_General_CI_AS,
+
+        NULLIF
+        (
+            LTRIM(RTRIM(CONVERT(nvarchar(500), d.[DataTable]))),
+            N''
+        ) COLLATE Latin1_General_CI_AS,
+
+        NULLIF
+        (
+            LTRIM(RTRIM(CONVERT(nvarchar(500), d.[DocumentType]))),
+            N''
+        ) COLLATE Latin1_General_CI_AS
+    FROM [reference].[Documentation] AS d
+),
+document_validation AS
+(
+    SELECT
+        s.*,
+
+        CASE WHEN EXISTS
+        (
+            SELECT 1
+            FROM all_documents AS d
+            WHERE d.DocumentId = s.ProcessDocumentId
+        )
+        THEN 1 ELSE 0 END AS DocumentExists,
+
+        CASE WHEN EXISTS
+        (
+            SELECT 1
+            FROM all_documents AS d
+            WHERE d.DocumentId = s.ProcessDocumentId
+              AND d.CountryCode = s.CountryCode_norm
+        )
+        THEN 1 ELSE 0 END AS DocumentExistsForCountry,
+
+        CASE WHEN EXISTS
+        (
+            SELECT 1
+            FROM all_documents AS d
+            WHERE d.DocumentId = s.ProcessDocumentId
+              AND d.CountryCode = s.CountryCode_norm
+              AND d.DataTable = N'aq/datatable/SPP'
+        )
+        THEN 1 ELSE 0 END AS HasExpectedDataTable,
+
+        CASE WHEN EXISTS
+        (
+            SELECT 1
+            FROM all_documents AS d
+            WHERE d.DocumentId = s.ProcessDocumentId
+              AND d.CountryCode = s.CountryCode_norm
+              AND d.DocumentType = N'aq/documenttype/ProcessDocument'
+        )
+        THEN 1 ELSE 0 END AS HasExpectedDocumentType,
+
+        CASE WHEN EXISTS
+        (
+            SELECT 1
+            FROM all_documents AS d
+            WHERE d.DocumentId = s.ProcessDocumentId
+              AND d.CountryCode = s.CountryCode_norm
+              AND d.DataTable = N'aq/datatable/SPP'
+              AND d.DocumentType = N'aq/documenttype/ProcessDocument'
+        )
+        THEN 1 ELSE 0 END AS HasValidDocument
+    FROM sp AS s
 )
 SELECT
-    s.CountryCode,
-    s.ProcessId,
-    s.AssessmentMethodId,
-    s.ProcessActivityBegin,
-    s.ProcessActivityEnd,
-    s.PollutantId,
-    s.ProcessDocumentId
-FROM sp AS s
-WHERE
-    /* Only populated values are validated by this rule. */
-    s.ProcessDocumentId_norm IS NOT NULL
-    AND NOT EXISTS
-    (
-        SELECT 1
-        FROM valid_documentation AS doc
-        WHERE doc.CountryCode_norm = s.CountryCode_norm
-          AND doc.DocumentId_norm = s.ProcessDocumentId_norm
-    );
+    CountryCode,
+    ProcessId,
+    AssessmentMethodId,
+    ProcessActivityBegin,
+    ProcessActivityEnd,
+    PollutantId,
+    ProcessDocumentIdRaw AS ProcessDocumentId,
+    CASE
+        WHEN DocumentExists = 0
+            THEN 'DOCUMENTID_NOT_FOUND'
+
+        WHEN DocumentExistsForCountry = 0
+            THEN 'DOCUMENTID_COUNTRYCODE_MISMATCH'
+
+        WHEN HasExpectedDataTable = 0
+         AND HasExpectedDocumentType = 0
+            THEN 'DOCUMENTID_WRONG_DATATABLE_AND_DOCUMENTTYPE'
+
+        WHEN HasExpectedDataTable = 0
+            THEN 'DOCUMENTID_WRONG_DATATABLE'
+
+        WHEN HasExpectedDocumentType = 0
+            THEN 'DOCUMENTID_WRONG_DOCUMENTTYPE'
+
+        ELSE 'DOCUMENTID_NOT_FOUND_WITH_EXPECTED_CLASSIFICATION'
+    END AS QC_FailureReason
+FROM document_validation
+WHERE ProcessDocumentId IS NOT NULL
+  AND HasValidDocument = 0
 GO
