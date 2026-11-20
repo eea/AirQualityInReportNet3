@@ -1,60 +1,66 @@
-USE [Airquality_R3]
+USE [Airquality_R3];
 GO
 
-/****** Object:  View [qc].[STA_0]    Script Date: 11/06/2026 13:09:04 ******/
-SET ANSI_NULLS ON
+SET ANSI_NULLS ON;
 GO
 
-SET QUOTED_IDENTIFIER ON
+SET QUOTED_IDENTIFIER ON;
 GO
 
-
-
-alter VIEW [qc].[STA_0] AS
-
+CREATE OR ALTER VIEW [qc].[STA_0]
+AS
 -- QC rule code: STA_0
--- QC rule name: STA_0 Status - [PK]
--- QC rule description: Reported MeasurementStation records shall be identified as new records or updates to existing reference records.
+-- QC rule name: STA_0 Information - [MeasurementStation]
+-- QC rule description:
+-- Identify whether each submitted record represents a new measurement station
+-- or an update to an existing one in the reference dataset.
 
+WITH submitted AS
+(
+    SELECT
+        ms.CountryCode,
+        ms.StationNationalCode,
 
-WITH cte_submitted AS (
-  SELECT
-    -- record_id,
-    NULLIF(CountryCode, '') AS CountryCode,
-    NULLIF(StationEoICode, '') AS StationEoICode,
-    NULLIF(NetworkId, '') AS NetworkId,
-    NULLIF(NetworkOrganisationalLevel, '') AS NetworkOrganisationalLevel,
-    NULLIF(Timezone, '') AS Timezone
+        NULLIF(
+            LTRIM(RTRIM(ms.CountryCode)) COLLATE DATABASE_DEFAULT,
+            ''
+        ) AS CountryCodeClean,
 
-  FROM reporting.MeasurementStation
+        NULLIF(
+            LTRIM(RTRIM(ms.StationNationalCode)) COLLATE DATABASE_DEFAULT,
+            ''
+        ) AS StationNationalCodeClean
+    FROM [reporting].[MeasurementStation] AS ms
 ),
+reference_data AS
+(
+    SELECT DISTINCT
+        NULLIF(
+            LTRIM(RTRIM(r.CountryCode)) COLLATE DATABASE_DEFAULT,
+            ''
+        ) AS CountryCodeClean,
 
-cte_reference AS (
-  SELECT
-    NULLIF(CountryCode, '') AS CountryCode,
-    NULLIF(StationEoICode, '') AS StationEoICode,
-    NULLIF(NetworkOrganisationalLevel, '') AS NetworkOrganisationalLevel,
-    Deletion,
-    ReportingTime
-
-  FROM reference.MeasurementStation
+        NULLIF(
+            LTRIM(RTRIM(r.StationNationalCode)) COLLATE DATABASE_DEFAULT,
+            ''
+        ) AS StationNationalCodeClean
+    FROM [reference].[MeasurementStation] AS r
 )
-
 SELECT
-  -- s.record_id,
-  s.CountryCode,
-  s.StationEoICode,
-  CASE
-    WHEN r.CountryCode IS NULL THEN 'Addition of new record'
-    WHEN COALESCE(s.NetworkOrganisationalLevel, '') = COALESCE(r.NetworkOrganisationalLevel, '')
-    THEN 'No modification'
-    ELSE 'Modification of existing record'
-  END AS record_status
-FROM cte_submitted s
-LEFT JOIN cte_reference r
-  ON s.CountryCode = r.CountryCode
- AND s.StationEoICode = r.StationEoICode
+    s.CountryCode,
+    s.StationNationalCode,
+    CASE
+        WHEN EXISTS
+        (
+            SELECT 1
+            FROM reference_data AS r
+            WHERE r.CountryCodeClean = s.CountryCodeClean
+              AND r.StationNationalCodeClean = s.StationNationalCodeClean
+        ) THEN
+            'Modification of existing record'
 
+        ELSE
+            'Addition of new record'
+    END AS record_status
+FROM submitted AS s;
 GO
-
-

@@ -1,7 +1,7 @@
 USE [Airquality_R3]
 GO
 
-/****** Object:  View [qc].[AUT_07_A]    Script Date: 23/10/2026 12:16:04 ******/
+/****** Object:  View [qc].[AUT_07_A]    Script Date: 17/11/2026 11:57:02 ******/
 SET ANSI_NULLS ON
 GO
 
@@ -9,7 +9,7 @@ SET QUOTED_IDENTIFIER ON
 GO
 
 
-CREATE   VIEW [qc].[AUT_07_A]
+CREATE OR ALTER   VIEW [qc].[AUT_07_A]
 AS
 
 -- Creation date: 21 October 2026
@@ -122,5 +122,4 @@ SELECT
     [AuthorityURL]
 FROM CTE_invalid_urls;
 GO
-
 
